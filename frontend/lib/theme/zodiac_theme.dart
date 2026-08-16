@@ -1,9 +1,14 @@
-import 'dart:ui';
+import 'package:flutter/material.dart';
 
 class ZodiacTheme {
+  static const String fontSignName = 'Gothica2';
+
   static const Color background = Color(0xFFE5E5DF);
+
   static const Color textPrimary = Color(0xFF202020);
+
   static const Color textSecondary = Color(0xFF777777);
+
   static const Color cardBorder = Color(0xFFD0D0CA);
 
   static const Map<String, Color> signColors = {
@@ -22,7 +27,7 @@ class ZodiacTheme {
   };
 
   static Color colorForSign(String sign) {
-    return signColors[sign.toLowerCase()] ??
+    return signColors[sign.toLowerCase()] ??  
         const Color(0xFF8A318E);
   }
 }

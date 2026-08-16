@@ -15,6 +15,7 @@ class ProfileSectionPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       height: height,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
