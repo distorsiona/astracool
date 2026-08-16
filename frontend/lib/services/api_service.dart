@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../models/birth_data_model.dart';
 import '../models/zodiac_profile_model.dart';
-
+import '../models/natal_chart_model.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -142,4 +142,58 @@ class ApiService {
       decoded,
     );
   }
+
+  static Future<NatalChartModel> getChart({
+  required String userId,
+}) async {
+  final uri = Uri.parse(
+    'http://127.0.0.1:8001/api/chart/$userId',
+  );
+
+  final response = await http.get(
+    uri,
+    headers: {
+      'Accept':
+          'application/json',
+    },
+  );
+
+  if (response.statusCode != 200) {
+    String message =
+        'No fue posible cargar la carta natal.';
+
+    try {
+      final decoded =
+          jsonDecode(
+        response.body,
+      );
+
+      if (decoded is Map &&
+          decoded['detail'] != null) {
+        message =
+            decoded['detail']
+                .toString();
+      }
+    } catch (_) {}
+
+    throw Exception(
+      message,
+    );
+  }
+
+  final decoded =
+      jsonDecode(
+    response.body,
+  );
+
+  if (decoded is! Map<String, dynamic>) {
+    throw Exception(
+      'El backend devolvió una carta natal inválida.',
+    );
+  }
+
+  return NatalChartModel.fromJson(
+    decoded,
+  );
+}
 }

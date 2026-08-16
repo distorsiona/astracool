@@ -8,6 +8,9 @@ from app.api.routes.astra import router as astra_router
 from app.api.routes.auth import router as auth_router
 
 from app.core.config import settings
+from app.api.routes.chart import (
+    router as chart_router,
+)
 
 
 app = FastAPI(
@@ -55,6 +58,10 @@ app.include_router(
     prefix="/api",
 )
 
+app.include_router(
+    chart_router,
+    prefix="/api",
+)
 
 
 @app.get("/")

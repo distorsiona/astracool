@@ -6,6 +6,7 @@ import '../theme/zodiac_theme.dart';
 import '../widgets/astrology_top_navigation.dart';
 import '../widgets/big_three_card.dart';
 import '../widgets/zodiac_profile_header.dart';
+import 'chart_screen.dart';
 
 
 class ProfileScreen extends StatefulWidget {
@@ -105,7 +106,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               activeSection: AstrologySection.profile,
               accentColor: accentColor,
               onToday: () {},
-              onChart: () {},
+              onChart: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ChartScreen(
+                      userId:
+                          widget.userId,
+                    ),
+                  ),
+                );
+              },
               onWeek: () {},
               onProfile: () {},
             ),
