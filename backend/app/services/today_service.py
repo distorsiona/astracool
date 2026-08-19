@@ -3,7 +3,7 @@ from datetime import date, datetime
 import httpx
 
 from app.core.config import settings
-from app.core.supabase import supabase
+from app.core.supabase import supabase_admin
 
 
 class TodayService:
@@ -124,7 +124,7 @@ class TodayService:
         # ========================================================
 
         profile_response = (
-            supabase
+            supabase_admin
             .table("profiles")
             .select(
                 "id,"

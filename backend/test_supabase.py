@@ -1,10 +1,10 @@
-from app.core.supabase import supabase
+from app.core.supabase import supabase_admin
 
 
 print("Probando profiles...")
 
 result = (
-    supabase
+    supabase_admin
     .table("profiles")
     .select("*")
     .limit(1)

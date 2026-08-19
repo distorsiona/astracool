@@ -1,6 +1,6 @@
 import asyncio
 
-from app.core.supabase import supabase
+from app.core.supabase import supabase_admin
 from app.schemas.astrology import AstrologyBirthRequest
 from app.services.astrology_service import astrology_service
 from app.services.astra_service import astra_service
@@ -12,7 +12,7 @@ async def backfill_natal_charts():
     # =========================================================
 
     profiles_response = (
-        supabase
+        supabase_admin
         .table("profiles")
         .select(
             "id,"
@@ -66,7 +66,7 @@ async def backfill_natal_charts():
             # =================================================
 
             existing_response = (
-                supabase
+                supabase_admin
                 .table("natal_charts")
                 .select("id")
                 .eq(
@@ -226,7 +226,7 @@ async def backfill_natal_charts():
             # =================================================
 
             insert_response = (
-                supabase
+                supabase_admin
                 .table("natal_charts")
                 .insert(
                     {

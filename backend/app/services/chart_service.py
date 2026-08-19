@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from app.core.supabase import supabase
+from app.core.supabase import supabase_admin
 
 
 class ChartService:
@@ -241,7 +241,7 @@ class ChartService:
         # =====================================================
 
         profile_response = (
-            supabase
+            supabase_admin
             .table("profiles")
             .select(
                 "id,"
@@ -282,7 +282,7 @@ class ChartService:
         # =====================================================
 
         chart_response = (
-            supabase
+            supabase_admin
             .table("natal_charts")
             .select(
                 "id,"
@@ -1054,7 +1054,7 @@ class ChartService:
 
         # buscamos la carta específica que se pidió
         chart_response = (
-            supabase
+            supabase_admin
             .table("natal_charts")
             .select(
                 "id,"

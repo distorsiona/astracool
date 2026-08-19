@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from app.core.supabase import supabase
+from app.core.supabase import supabase_admin
 from app.schemas.astrology import AstrologyBirthRequest
 from app.schemas.profile import ProfileUpsertRequest
 from app.services.astrology_service import (
@@ -72,7 +72,7 @@ class ProfileService:
         }
 
         result = (
-            supabase
+            supabase_admin
             .table("profiles")
             .upsert(profile_record)
             .execute()
@@ -85,7 +85,7 @@ class ProfileService:
             )
 
         (
-            supabase
+            supabase_admin
             .table("natal_charts")
             .upsert(
                 {
@@ -112,7 +112,7 @@ class ProfileService:
     ) -> dict:
 
         profile_result = (
-            supabase
+            supabase_admin
             .table("profiles")
             .select("*")
             .eq("id", user_id)

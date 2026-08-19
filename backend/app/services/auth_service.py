@@ -67,7 +67,7 @@ class AuthService:
         # ========================================================
 
         username_result = (
-            supabase
+            supabase_admin
             .table("profiles")
             .select("id")
             .eq(
@@ -290,7 +290,7 @@ class AuthService:
 
         try:
             auth_response = (
-                supabase
+                supabase_admin
                 .auth
                 .admin
                 .create_user(
@@ -453,7 +453,7 @@ class AuthService:
 
         try:
             profile_response = (
-                supabase
+                supabase_admin
                 .table("profiles")
                 .insert(
                     profile_data
@@ -568,7 +568,7 @@ class AuthService:
 
         try:
             natal_chart_response = (
-                supabase
+                supabase_admin
                 .table("natal_charts")
                 .insert(
                     natal_chart_data
@@ -687,7 +687,7 @@ class AuthService:
             )
 
             profile_response = (
-                supabase
+                supabase_admin
                 .table("profiles")
                 .select("id")
                 .eq(
@@ -710,7 +710,7 @@ class AuthService:
 
             try:
                 auth_user_response = (
-                    supabase
+                    supabase_admin
                     .auth
                     .admin
                     .get_user_by_id(
@@ -757,7 +757,7 @@ class AuthService:
 
         try:
             auth_response = (
-                supabase
+                supabase_auth
                 .auth
                 .sign_in_with_password(
                     {
@@ -928,7 +928,7 @@ class AuthService:
         # ========================================================
 
         profile_response = (
-            supabase
+            supabase_admin
             .table("profiles")
             .select(
                 "id,"
@@ -1023,7 +1023,7 @@ class AuthService:
 
         try:
             (
-                supabase
+                supabase_admin
                 .table("natal_charts")
                 .delete()
                 .eq(
@@ -1046,7 +1046,7 @@ class AuthService:
         if delete_profile:
             try:
                 (
-                    supabase
+                    supabase_admin
                     .table("profiles")
                     .delete()
                     .eq(
@@ -1068,7 +1068,7 @@ class AuthService:
 
         try:
             (
-                supabase
+                supabase_admin
                 .auth
                 .admin
                 .delete_user(
