@@ -29,12 +29,31 @@ class AstrologyTopNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, constraints) {
+      builder: (
+        context,
+        constraints,
+      ) {
         final width = constraints.maxWidth;
+
+        // ======================================================
+        // MOBILE
+        // ======================================================
 
         if (width < 650) {
           return _buildMobile();
         }
+
+        // ======================================================
+        // TABLET / VENTANA MEDIANA
+        // ======================================================
+
+        if (width < 1050) {
+          return _buildTablet();
+        }
+
+        // ======================================================
+        // DESKTOP
+        // ======================================================
 
         return _buildDesktop();
       },
@@ -42,7 +61,7 @@ class AstrologyTopNavigation extends StatelessWidget {
   }
 
   // ============================================================
-  // DESKTOP / TABLET
+  // DESKTOP
   // ============================================================
 
   Widget _buildDesktop() {
@@ -50,16 +69,9 @@ class AstrologyTopNavigation extends StatelessWidget {
       width: double.infinity,
       height: 92,
       padding: const EdgeInsets.symmetric(
-        horizontal: 58,
+        horizontal: 42,
       ),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Color(0xFFD4D0CA),
-            width: 1,
-          ),
-        ),
-      ),
+      decoration: _bottomBorderDecoration(),
       child: Row(
         children: [
           // ====================================================
@@ -67,15 +79,15 @@ class AstrologyTopNavigation extends StatelessWidget {
           // ====================================================
 
           SizedBox(
-            width: 220,
+            width: 180,
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                // TODO: nombre temporal de la app.
-                'A S T R A',
+                'S A C R E D',
+                maxLines: 1,
                 style: TextStyle(
                   color: accentColor,
-                  fontSize: 25,
+                  fontSize: 24,
                   letterSpacing: 5,
                   fontWeight: FontWeight.w500,
                 ),
@@ -84,7 +96,7 @@ class AstrologyTopNavigation extends StatelessWidget {
           ),
 
           // ====================================================
-          // NAV CENTRADA
+          // NAV
           // ====================================================
 
           Expanded(
@@ -93,38 +105,34 @@ class AstrologyTopNavigation extends StatelessWidget {
               children: [
                 _DesktopNavItem(
                   title: 'TODAY',
-                  selected:
-                      activeSection == AstrologySection.today,
+                  selected: activeSection == AstrologySection.today,
                   accentColor: accentColor,
                   onTap: onToday,
                 ),
-
-                const SizedBox(width: 44),
-
+                const SizedBox(
+                  width: 36,
+                ),
                 _DesktopNavItem(
                   title: 'CHART',
-                  selected:
-                      activeSection == AstrologySection.chart,
+                  selected: activeSection == AstrologySection.chart,
                   accentColor: accentColor,
                   onTap: onChart,
                 ),
-
-                const SizedBox(width: 44),
-
+                const SizedBox(
+                  width: 36,
+                ),
                 _DesktopNavItem(
                   title: 'WEEK',
-                  selected:
-                      activeSection == AstrologySection.week,
+                  selected: activeSection == AstrologySection.week,
                   accentColor: accentColor,
                   onTap: onWeek,
                 ),
-
-                const SizedBox(width: 44),
-
+                const SizedBox(
+                  width: 36,
+                ),
                 _DesktopNavItem(
                   title: 'ME',
-                  selected:
-                      activeSection == AstrologySection.profile,
+                  selected: activeSection == AstrologySection.profile,
                   accentColor: accentColor,
                   onTap: onProfile,
                 ),
@@ -133,43 +141,114 @@ class AstrologyTopNavigation extends StatelessWidget {
           ),
 
           // ====================================================
-          // PERFIL
+          // PROFILE ICON
           // ====================================================
 
           SizedBox(
-            width: 220,
+            width: 180,
             child: Align(
               alignment: Alignment.centerRight,
-              child: InkWell(
+              child: _ProfileButton(
+                selected: activeSection == AstrologySection.profile,
+                accentColor: accentColor,
                 onTap: onProfile,
-                borderRadius: BorderRadius.circular(999),
-                child: Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: activeSection ==
-                              AstrologySection.profile
-                          ? accentColor
-                          : const Color(0xFF252525),
-                      width: activeSection ==
-                              AstrologySection.profile
-                          ? 1.8
-                          : 1.2,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.person_outline,
-                    size: 25,
-                    color: activeSection ==
-                            AstrologySection.profile
-                        ? accentColor
-                        : const Color(0xFF252525),
-                  ),
-                ),
+                size: 44,
+                iconSize: 25,
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // TABLET
+  // ============================================================
+
+  Widget _buildTablet() {
+    return Container(
+      width: double.infinity,
+      height: 78,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+      ),
+      decoration: _bottomBorderDecoration(),
+      child: Row(
+        children: [
+          // ====================================================
+          // LOGO MÁS COMPACTO
+          // ====================================================
+
+          Text(
+            'SACRED',
+            maxLines: 1,
+            style: TextStyle(
+              color: accentColor,
+              fontSize: 19,
+              letterSpacing: 3.2,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+
+          const SizedBox(
+            width: 16,
+          ),
+
+          // ====================================================
+          // NAV FLEXIBLE
+          // ====================================================
+
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: _TabletNavItem(
+                    title: 'TODAY',
+                    selected: activeSection == AstrologySection.today,
+                    accentColor: accentColor,
+                    onTap: onToday,
+                  ),
+                ),
+                Expanded(
+                  child: _TabletNavItem(
+                    title: 'CHART',
+                    selected: activeSection == AstrologySection.chart,
+                    accentColor: accentColor,
+                    onTap: onChart,
+                  ),
+                ),
+                Expanded(
+                  child: _TabletNavItem(
+                    title: 'WEEK',
+                    selected: activeSection == AstrologySection.week,
+                    accentColor: accentColor,
+                    onTap: onWeek,
+                  ),
+                ),
+                Expanded(
+                  child: _TabletNavItem(
+                    title: 'ME',
+                    selected: activeSection == AstrologySection.profile,
+                    accentColor: accentColor,
+                    onTap: onProfile,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(
+            width: 12,
+          ),
+
+          _ProfileButton(
+            selected: activeSection == AstrologySection.profile,
+            accentColor: accentColor,
+            onTap: onProfile,
+            size: 38,
+            iconSize: 22,
           ),
         ],
       ),
@@ -183,107 +262,154 @@ class AstrologyTopNavigation extends StatelessWidget {
   Widget _buildMobile() {
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Color(0xFFD4D0CA),
-          ),
-        ),
-      ),
+      decoration: _bottomBorderDecoration(),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          // ====================================================
+          // TOP ROW
+          // ====================================================
+
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              18,
-              14,
-              18,
-              8,
+              16,
+              12,
+              16,
+              7,
             ),
             child: Row(
               children: [
-                Text(
-                  'A S T R A',
-                  style: TextStyle(
-                    color: accentColor,
-                    fontSize: 17,
-                    letterSpacing: 4,
-                    fontWeight: FontWeight.w500,
+                Expanded(
+                  child: Text(
+                    'S A C R E D',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: accentColor,
+                      fontSize: 16,
+                      letterSpacing: 3.6,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-
-                const Spacer(),
-
-                InkWell(
+                const SizedBox(
+                  width: 12,
+                ),
+                _ProfileButton(
+                  selected: activeSection == AstrologySection.profile,
+                  accentColor: accentColor,
                   onTap: onProfile,
-                  borderRadius: BorderRadius.circular(999),
-                  child: Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: activeSection ==
-                                AstrologySection.profile
-                            ? accentColor
-                            : const Color(0xFF252525),
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.person_outline,
-                      size: 20,
-                      color: activeSection ==
-                              AstrologySection.profile
-                          ? accentColor
-                          : const Color(0xFF252525),
-                    ),
-                  ),
+                  size: 34,
+                  iconSize: 20,
                 ),
               ],
             ),
           ),
 
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-              ),
-              child: Row(
-                children: [
-                  _MobileNavItem(
+          // ====================================================
+          // NAV - NO SCROLL, SIEMPRE CABE
+          // ====================================================
+
+          SizedBox(
+            height: 46,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _MobileNavItem(
                     title: 'TODAY',
-                    selected:
-                        activeSection == AstrologySection.today,
+                    selected: activeSection == AstrologySection.today,
                     accentColor: accentColor,
                     onTap: onToday,
                   ),
-                  _MobileNavItem(
+                ),
+                Expanded(
+                  child: _MobileNavItem(
                     title: 'CHART',
-                    selected:
-                        activeSection == AstrologySection.chart,
+                    selected: activeSection == AstrologySection.chart,
                     accentColor: accentColor,
                     onTap: onChart,
                   ),
-                  _MobileNavItem(
+                ),
+                Expanded(
+                  child: _MobileNavItem(
                     title: 'WEEK',
-                    selected:
-                        activeSection == AstrologySection.week,
+                    selected: activeSection == AstrologySection.week,
                     accentColor: accentColor,
                     onTap: onWeek,
                   ),
-                  _MobileNavItem(
-                    title: 'PROFILE',
-                    selected:
-                        activeSection == AstrologySection.profile,
+                ),
+                Expanded(
+                  child: _MobileNavItem(
+                    title: 'ME',
+                    selected: activeSection == AstrologySection.profile,
                     accentColor: accentColor,
                     onTap: onProfile,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ================================================================
+// PROFILE BUTTON
+// ================================================================
+
+class _ProfileButton extends StatelessWidget {
+  final bool selected;
+  final Color accentColor;
+  final VoidCallback? onTap;
+
+  final double size;
+  final double iconSize;
+
+  const _ProfileButton({
+    required this.selected,
+    required this.accentColor,
+    required this.onTap,
+    required this.size,
+    required this.iconSize,
+  });
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(
+          999,
+        ),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: selected
+                  ? accentColor
+                  : const Color(
+                      0xFF252525,
+                    ),
+              width: selected ? 1.8 : 1.1,
+            ),
+          ),
+          child: Icon(
+            Icons.person_outline,
+            size: iconSize,
+            color: selected
+                ? accentColor
+                : const Color(
+                    0xFF252525,
+                  ),
+          ),
+        ),
       ),
     );
   }
@@ -307,37 +433,120 @@ class _DesktopNavItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: SizedBox(
-        height: 92,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 4),
-
-            Text(
-              title,
-              style: TextStyle(
-                color: selected
-                    ? accentColor
-                    : const Color(0xFF1E1E1E),
-                fontSize: 15,
-                fontWeight:
-                    selected ? FontWeight.w600 : FontWeight.w400,
+  Widget build(
+    BuildContext context,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 92,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(
+                height: 4,
               ),
-            ),
+              Text(
+                title,
+                maxLines: 1,
+                style: TextStyle(
+                  color: selected
+                      ? accentColor
+                      : const Color(
+                          0xFF1E1E1E,
+                        ),
+                  fontSize: 14,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+              const SizedBox(
+                height: 9,
+              ),
+              AnimatedContainer(
+                duration: const Duration(
+                  milliseconds: 180,
+                ),
+                width: selected ? 64 : 0,
+                height: 2,
+                decoration: BoxDecoration(
+                  color: accentColor,
+                  borderRadius: BorderRadius.circular(
+                    99,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-            const SizedBox(height: 9),
+// ================================================================
+// TABLET ITEM
+// ================================================================
 
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              width: selected ? 72 : 0,
-              height: 2,
-              color: accentColor,
-            ),
-          ],
+class _TabletNavItem extends StatelessWidget {
+  final String title;
+  final bool selected;
+  final Color accentColor;
+  final VoidCallback? onTap;
+
+  const _TabletNavItem({
+    required this.title,
+    required this.selected,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 78,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: selected
+                      ? accentColor
+                      : const Color(
+                          0xFF252525,
+                        ),
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+              const SizedBox(
+                height: 8,
+              ),
+              AnimatedContainer(
+                duration: const Duration(
+                  milliseconds: 180,
+                ),
+                width: selected ? 46 : 0,
+                height: 2,
+                decoration: BoxDecoration(
+                  color: accentColor,
+                  borderRadius: BorderRadius.circular(
+                    99,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -362,41 +571,70 @@ class _MobileNavItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 17,
-        ),
+  Widget build(
+    BuildContext context,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 11,
-              ),
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: selected
-                      ? accentColor
-                      : const Color(0xFF252525),
-                  fontSize: 11,
-                  fontWeight:
-                      selected ? FontWeight.w600 : FontWeight.w400,
+            Expanded(
+              child: Center(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: selected
+                        ? accentColor
+                        : const Color(
+                            0xFF252525,
+                          ),
+                    fontSize: 10.5,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  ),
                 ),
               ),
             ),
-
             AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              width: selected ? 42 : 0,
+              duration: const Duration(
+                milliseconds: 180,
+              ),
+              width: selected ? 38 : 0,
               height: 2,
-              color: accentColor,
+              decoration: BoxDecoration(
+                color: accentColor,
+                borderRadius: BorderRadius.circular(
+                  99,
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+// ================================================================
+// DECORATION
+// ================================================================
+
+BoxDecoration _bottomBorderDecoration() {
+  return const BoxDecoration(
+    color: Color(
+      0xFFF4F1EE,
+    ),
+    border: Border(
+      bottom: BorderSide(
+        color: Color(
+          0xFFD4D0CA,
+        ),
+        width: 1,
+      ),
+    ),
+  );
 }

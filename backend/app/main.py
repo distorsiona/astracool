@@ -1,16 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.config import settings
+
 from app.api.routes.astrology import router as astrology_router
 from app.api.routes.profile import router as profile_router
 from app.api.routes.location import router as location_router
 from app.api.routes.astra import router as astra_router
 from app.api.routes.auth import router as auth_router
-
-from app.core.config import settings
-from app.api.routes.chart import (
-    router as chart_router,
-)
+from app.api.routes.chart import router as chart_router
+from app.api.routes.today import router as today_router
+from app.api.routes.houses import router as houses_router
 
 
 app = FastAPI(
@@ -32,6 +32,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# ============================================================
+# ROUTERS
+# ============================================================
 
 app.include_router(
     astrology_router,
@@ -63,6 +67,20 @@ app.include_router(
     prefix="/api",
 )
 
+app.include_router(
+    today_router,
+    prefix="/api",
+)
+
+app.include_router(
+    houses_router,
+    prefix="/api",
+)
+
+
+# ============================================================
+# ROOT
+# ============================================================
 
 @app.get("/")
 async def root():
@@ -71,6 +89,10 @@ async def root():
         "status": "running",
     }
 
+
+# ============================================================
+# HEALTH
+# ============================================================
 
 @app.get("/health")
 async def health():

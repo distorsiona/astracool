@@ -7,7 +7,7 @@ void main() {
     'ProfileScreen loads correctly',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const AstrologyApp(),
+        const SacredApp(),
       );
 
       expect(
