@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/house_detail_model.dart';
 import '../../../models/house_model.dart';
 import '../../../utils/astrology_symbols.dart';
@@ -27,11 +29,12 @@ class HouseRulerSection extends StatelessWidget {
     final ruler = rulerPlacement;
 
     return SectionCard(
-      title: 'HOUSE RULER',
+      title: AppLocalizations.of(context)!.houseRulerTitle,
       accentColor: accentColor,
       child: ruler == null
-          ? _buildWithoutPlacement()
+          ? _buildWithoutPlacement(context)
           : _buildPlacement(
+              context,
               ruler,
             ),
     );
@@ -41,11 +44,13 @@ class HouseRulerSection extends StatelessWidget {
   // SIN POSICIÓN DEL REGENTE
   // ============================================================
 
-  Widget _buildWithoutPlacement() {
+  Widget _buildWithoutPlacement(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Text(
       house.ruler.trim().isEmpty
-          ? 'No ruling planet information is available.'
-          : '${house.ruler} rules this house.',
+          ? l10n.noRulerInfoMessage
+          : l10n.rulesThisHouse(localizedPlanetName(context, house.ruler)),
       style: const TextStyle(
         color: Color(0xFF4F434F),
         fontSize: 12.5,
@@ -59,8 +64,11 @@ class HouseRulerSection extends StatelessWidget {
   // ============================================================
 
   Widget _buildPlacement(
+    BuildContext context,
     RulerPlacementModel ruler,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -78,79 +86,61 @@ class HouseRulerSection extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(width: 6),
-
         Expanded(
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                ruler.planet.toUpperCase(),
+                localizedPlanetName(context, ruler.planet).toUpperCase(),
                 maxLines: 1,
-                overflow:
-                    TextOverflow.ellipsis,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Color(0xFF231729),
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-
               const SizedBox(height: 5),
-
               Wrap(
                 spacing: 5,
                 runSpacing: 3,
                 children: [
-                  if (ruler.sign != null &&
-                      ruler.sign!.trim().isNotEmpty)
+                  if (ruler.sign != null && ruler.sign!.trim().isNotEmpty)
                     Text(
-                      ruler.sign!,
+                      localizedSignName(context, ruler.sign!),
                       style: const TextStyle(
-                        color:
-                            Color(0xFF817380),
+                        color: Color(0xFF817380),
                         fontSize: 12,
                       ),
                     ),
-
-                  if (ruler.formattedDegree !=
-                          null &&
-                      ruler.formattedDegree!
-                          .trim()
-                          .isNotEmpty)
+                  if (ruler.formattedDegree != null &&
+                      ruler.formattedDegree!.trim().isNotEmpty)
                     Text(
                       '· ${ruler.formattedDegree}',
                       style: const TextStyle(
-                        color:
-                            Color(0xFF817380),
+                        color: Color(0xFF817380),
                         fontSize: 12,
                       ),
                     ),
-
                   if (ruler.house != null)
                     Text(
-                      '· House ${romanNumeral(ruler.house!)}',
+                      l10n.rulerHouseInline(romanNumeral(ruler.house!)),
                       style: const TextStyle(
-                        color:
-                            Color(0xFF817380),
+                        color: Color(0xFF817380),
                         fontSize: 12,
                       ),
                     ),
                 ],
               ),
-
               if (ruler.isRetrograde) ...[
                 const SizedBox(height: 6),
-
                 Text(
-                  'Retrograde',
+                  l10n.retrogradeLabel,
                   style: TextStyle(
                     color: accentColor,
                     fontSize: 10,
-                    fontWeight:
-                        FontWeight.w600,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],

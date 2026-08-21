@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/natal_chart_model.dart';
 import '../../../theme/card_decorations.dart';
 import '../chart_layout.dart';
@@ -20,6 +22,8 @@ class SignDetailsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 20 : 26),
@@ -31,7 +35,7 @@ class SignDetailsPanel extends StatelessWidget {
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
-              profile.sign.toUpperCase(),
+              localizedSignName(context, profile.sign).toUpperCase(),
               style: TextStyle(
                 color: accentColor,
                 fontFamily: 'serif',
@@ -50,22 +54,22 @@ class SignDetailsPanel extends StatelessWidget {
               children: [
                 ChartDetailRow(
                   icon: Icons.water_drop_outlined,
-                  label: 'ELEMENT',
-                  value: profile.element,
+                  label: l10n.elementLabel,
+                  value: localizedElementLabel(context, profile.element),
                   accentColor: accentColor,
                 ),
                 const SizedBox(height: 19),
                 ChartDetailRow(
                   icon: Icons.public_outlined,
-                  label: 'RULING PLANET',
-                  value: profile.rulingPlanet,
+                  label: l10n.rulingPlanetLabel,
+                  value: localizedPlanetName(context, profile.rulingPlanet),
                   accentColor: accentColor,
                 ),
                 const SizedBox(height: 19),
                 ChartDetailRow(
                   icon: Icons.crop_square_outlined,
-                  label: 'MODALITY',
-                  value: profile.modality,
+                  label: l10n.modalityLabel,
+                  value: localizedModalityLabel(context, profile.modality),
                   accentColor: accentColor,
                 ),
               ],

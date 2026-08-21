@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+
 class PageHeader extends StatelessWidget {
   final Color accentColor;
   final bool isMobile;
@@ -14,11 +16,13 @@ class PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'YOUR NATAL HOUSES',
+          l10n.yourNatalHousesEyebrow,
           style: TextStyle(
             color: accentColor,
             fontSize: 11,
@@ -28,7 +32,7 @@ class PageHeader extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'The Twelve Houses',
+          l10n.twelveHousesTitle,
           style: TextStyle(
             color: accentColor,
             fontFamily: 'serif',
@@ -42,11 +46,9 @@ class PageHeader extends StatelessWidget {
           constraints: BoxConstraints(
             maxWidth: isMobile ? double.infinity : 760,
           ),
-          child: const Text(
-            'Each house represents a different area of your life. '
-            'Its sign, ruling planet, planets inside it and aspects '
-            'show how that area is expressed in your natal chart.',
-            style: TextStyle(
+          child: Text(
+            l10n.twelveHousesDescription,
+            style: const TextStyle(
               color: Color(0xFF6F626E),
               fontSize: 13,
               height: 1.6,

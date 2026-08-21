@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/natal_chart_model.dart';
 import '../../../utils/astrology_symbols.dart';
 import '../../../theme/card_decorations.dart';
@@ -38,7 +39,7 @@ class ChartWheelCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Your Celestial Blueprint',
+            AppLocalizations.of(context)!.celestialBlueprintTitle,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: accentColor,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/natal_chart_model.dart';
 import '../../../theme/card_decorations.dart';
 import '../chart_layout.dart';
@@ -20,6 +22,8 @@ class BigThreePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       decoration: cardDecoration(),
@@ -44,7 +48,7 @@ class BigThreePanel extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: Text(
-                          'YOUR BIG THREE',
+                          l10n.bigThreeTitle,
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -63,7 +67,7 @@ class BigThreePanel extends StatelessWidget {
                 const SizedBox(height: 20),
                 BigThreeRow(
                   symbol: '☉',
-                  title: 'SUN',
+                  title: l10n.sunLabel,
                   placement: bigThree.sun,
                   accentColor: accentColor,
                   compact: isMobile,
@@ -74,7 +78,7 @@ class BigThreePanel extends StatelessWidget {
                 ),
                 BigThreeRow(
                   symbol: '☾',
-                  title: 'MOON',
+                  title: l10n.moonLabel,
                   placement: bigThree.moon,
                   accentColor: accentColor,
                   compact: isMobile,
@@ -85,7 +89,7 @@ class BigThreePanel extends StatelessWidget {
                 ),
                 BigThreeRow(
                   symbol: '↑',
-                  title: 'RISING',
+                  title: l10n.risingLabel,
                   placement: bigThree.rising,
                   accentColor: accentColor,
                   compact: isMobile,
@@ -117,8 +121,9 @@ class BigThreeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sign =
-        placement.sign.trim().isEmpty ? '—' : placement.sign.toUpperCase();
+    final sign = placement.sign.trim().isEmpty
+        ? '—'
+        : localizedSignName(context, placement.sign).toUpperCase();
 
     return Row(
       children: [

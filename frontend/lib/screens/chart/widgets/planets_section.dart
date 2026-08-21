@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/natal_chart_model.dart';
 import '../../../utils/astrology_symbols.dart';
 import '../../../theme/card_decorations.dart';
@@ -22,6 +24,8 @@ class PlanetsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(layout == ChartLayout.mobile ? 18 : 24),
@@ -29,10 +33,10 @@ class PlanetsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ChartSectionTitle(title: 'PLANETS', accentColor: accentColor),
+          ChartSectionTitle(title: l10n.planetsTitle, accentColor: accentColor),
           const SizedBox(height: 18),
           if (planets.isEmpty)
-            const Text('No hay datos planetarios disponibles.')
+            Text(l10n.noPlanetDataMessage)
           else
             ...planets.map(
               (planet) => PlanetRow(
@@ -61,6 +65,8 @@ class PlanetRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (compact) {
       return Container(
         width: double.infinity,
@@ -83,7 +89,7 @@ class PlanetRow extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          planet.planet,
+                          localizedPlanetName(context, planet.planet),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontWeight: FontWeight.w600),
@@ -101,8 +107,9 @@ class PlanetRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${planet.sign} · ${formatAstrologyDegree(planet.degree)} · '
-                    '${planet.house == null ? 'Sin casa' : 'Casa ${planet.house}'}',
+                    '${localizedSignName(context, planet.sign)} · '
+                    '${formatAstrologyDegree(planet.degree)} · '
+                    '${planet.house == null ? l10n.noHouseInline : l10n.houseNumberInline(planet.house!)}',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -133,7 +140,7 @@ class PlanetRow extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Text(
-              planet.planet,
+              localizedPlanetName(context, planet.planet),
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
@@ -141,11 +148,18 @@ class PlanetRow extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             flex: 2,
-            child: Text(planet.sign, overflow: TextOverflow.ellipsis),
+            child: Text(
+              localizedSignName(context, planet.sign),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           Expanded(child: Text(formatAstrologyDegree(planet.degree))),
           Expanded(
-            child: Text(planet.house == null ? '—' : 'Casa ${planet.house}'),
+            child: Text(
+              planet.house == null
+                  ? '—'
+                  : l10n.houseNumberInline(planet.house!),
+            ),
           ),
           SizedBox(
             width: 26,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/natal_chart_model.dart';
 import '../../../utils/astrology_symbols.dart';
 import 'section_card.dart';
@@ -17,7 +18,8 @@ class InterpretationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SectionCard(
-      title: 'YOUR HOUSE ${romanNumeral(house.number)}',
+      title: AppLocalizations.of(context)!
+          .yourHouseTitle(romanNumeral(house.number)),
       accentColor: accentColor,
       child: Text(
         house.interpretation,

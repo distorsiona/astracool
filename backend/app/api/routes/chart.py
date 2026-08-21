@@ -98,6 +98,7 @@
 
 
 import traceback
+from typing import Optional
 
 from fastapi import (
     APIRouter,
@@ -123,10 +124,12 @@ router = APIRouter(
 @router.get("/{user_id}")
 async def get_chart(
     user_id: str,
+    lang: Optional[str] = None,
 ):
     try:
-        return chart_service.get_chart(
-            user_id
+        return await chart_service.get_chart(
+            user_id,
+            lang=lang,
         )
 
     except HTTPException:

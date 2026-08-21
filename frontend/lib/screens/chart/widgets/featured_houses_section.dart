@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/natal_chart_model.dart';
 import '../../../utils/astrology_symbols.dart';
 import '../../../theme/card_decorations.dart';
@@ -31,6 +33,7 @@ class FeaturedHousesSection extends StatelessWidget {
     }
 
     final visible = houses.take(4).toList();
+    final title = AppLocalizations.of(context)!.mostActiveHousesTitle;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -43,7 +46,7 @@ class FeaturedHousesSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ChartSectionTitle(
-                    title: 'YOUR MOST ACTIVE HOUSES',
+                    title: title,
                     accentColor: accentColor,
                   ),
                   const SizedBox(height: 4),
@@ -62,7 +65,7 @@ class FeaturedHousesSection extends StatelessWidget {
               children: [
                 Expanded(
                   child: ChartSectionTitle(
-                    title: 'YOUR MOST ACTIVE HOUSES',
+                    title: title,
                     accentColor: accentColor,
                   ),
                 ),
@@ -125,9 +128,9 @@ class ViewAllButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'View all houses',
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+          Text(
+            AppLocalizations.of(context)!.viewAllHouses,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
           ),
           const SizedBox(width: 4),
           Icon(Icons.arrow_forward, size: 15, color: accentColor),
@@ -151,6 +154,8 @@ class FeaturedHouseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -191,7 +196,8 @@ class FeaturedHouseCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: Text(
-                            house.strengthLabel,
+                            localizedActivityLevel(
+                                context, house.strengthLabel),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -208,8 +214,12 @@ class FeaturedHouseCard extends StatelessWidget {
                 const SizedBox(height: 9),
                 Text(
                   house.title.trim().isEmpty
-                      ? 'HOUSE ${house.number}'
-                      : house.title.toUpperCase(),
+                      ? l10n.houseFallbackTitle(house.number)
+                      : localizeHouseTitle(
+                          context,
+                          house.number,
+                          house.title,
+                        ).toUpperCase(),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -223,7 +233,11 @@ class FeaturedHouseCard extends StatelessWidget {
                 if (house.subtitle.trim().isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    house.subtitle,
+                    localizeHouseSubtitle(
+                      context,
+                      house.number,
+                      house.subtitle,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -235,7 +249,8 @@ class FeaturedHouseCard extends StatelessWidget {
                 ],
                 const SizedBox(height: 12),
                 Text(
-                  '${house.sign} · ${formatAstrologyDegree(house.degree)}',
+                  '${localizedSignName(context, house.sign)} · '
+                  '${formatAstrologyDegree(house.degree)}',
                   style: const TextStyle(
                     color: Color(0xFF4F434F),
                     fontSize: 12,
@@ -245,8 +260,10 @@ class FeaturedHouseCard extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   house.ruler.trim().isEmpty
-                      ? 'Ruler · —'
-                      : 'Ruler · ${house.ruler}',
+                      ? l10n.rulerUnknown
+                      : l10n.rulerWithName(
+                          localizedPlanetName(context, house.ruler),
+                        ),
                   style: const TextStyle(
                     color: Color(0xFF817380),
                     fontSize: 10.5,
@@ -259,7 +276,8 @@ class FeaturedHouseCard extends StatelessWidget {
                     runSpacing: 7,
                     children: house.planets.map((planet) {
                       return Text(
-                        '${planetSymbol(planet.planet)} ${planet.planet}',
+                        '${planetSymbol(planet.planet)} '
+                        '${localizedPlanetName(context, planet.planet)}',
                         style: TextStyle(
                           color: accentColor,
                           fontSize: 11,
@@ -275,7 +293,10 @@ class FeaturedHouseCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        house.themes.take(3).join(' · '),
+                        house.themes
+                            .take(3)
+                            .map((t) => localizeHouseKeyword(context, t))
+                            .join(' · '),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

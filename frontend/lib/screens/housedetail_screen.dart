@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/error_messages.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../l10n/locale_controller.dart';
 import '../models/house_detail_model.dart';
 import '../services/api_service.dart';
 import '../theme/zodiac_theme.dart';
@@ -30,23 +33,46 @@ class HouseDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<HouseDetailScreen> createState() =>
-      _HouseDetailScreenState();
+  State<HouseDetailScreen> createState() => _HouseDetailScreenState();
 }
 
-class _HouseDetailScreenState
-    extends State<HouseDetailScreen> {
+class _HouseDetailScreenState extends State<HouseDetailScreen> {
   final ApiService _apiService = ApiService();
 
   HouseDetailModel? _data;
 
   bool _isLoading = true;
-  String? _errorMessage;
+  Object? _loadError;
+
+  // se usan para volver a pedir el detalle cuando el usuario
+  // cambia de idioma en tiempo de ejecución (EN <-> ES).
+  bool _initialized = false;
+  String? _lastLanguage;
 
   @override
   void initState() {
     super.initState();
-    _loadHouse();
+    // la carga inicial se dispara desde didChangeDependencies,
+    // porque ahí sí es seguro leer LocaleScope.of(context).
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final currentLanguage = LocaleScope.of(context).value.languageCode;
+
+    if (!_initialized) {
+      _initialized = true;
+      _lastLanguage = currentLanguage;
+      _loadHouse();
+      return;
+    }
+
+    if (_lastLanguage != currentLanguage) {
+      _lastLanguage = currentLanguage;
+      _loadHouse();
+    }
   }
 
   // ============================================================
@@ -58,13 +84,14 @@ class _HouseDetailScreenState
   Future<void> _loadHouse() async {
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
+      _loadError = null;
     });
 
     try {
       final result = await _apiService.getHouseDetail(
         widget.userId,
         widget.houseNumber,
+        language: LocaleScope.of(context).value.languageCode,
       );
 
       if (!mounted) {
@@ -82,7 +109,7 @@ class _HouseDetailScreenState
 
       setState(() {
         _isLoading = false;
-        _errorMessage = error.toString();
+        _loadError = error;
       });
     }
   }
@@ -101,7 +128,7 @@ class _HouseDetailScreenState
       return _buildLoading(accentColor);
     }
 
-    if (_errorMessage != null) {
+    if (_loadError != null) {
       return _buildError(accentColor);
     }
 
@@ -110,8 +137,7 @@ class _HouseDetailScreenState
     if (data == null) {
       return _buildError(
         accentColor,
-        customMessage:
-            'No fue posible cargar esta casa.',
+        customMessage: AppLocalizations.of(context)!.houseDetailLoadError,
       );
     }
 
@@ -122,45 +148,34 @@ class _HouseDetailScreenState
           children: [
             SacredDetailTopBar(
               accentColor: accentColor,
-              trailingLabel:
-                  'HOUSE ${data.house.roman}',
+              trailingLabel: AppLocalizations.of(context)!
+                  .houseTopBarLabel(data.house.roman),
               onBack: () {
                 Navigator.pop(context);
               },
             ),
-
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final width =
-                      constraints.maxWidth;
+                  final width = constraints.maxWidth;
 
-                  final isMobile =
-                      width < 650;
+                  final isMobile = width < 650;
 
-                  final isTablet =
-                      width >= 650 &&
-                      width < 1100;
+                  final isTablet = width >= 650 && width < 1100;
 
-                  final horizontalPadding =
-                      isMobile
-                          ? 14.0
-                          : isTablet
-                              ? 28.0
-                              : 46.0;
+                  final horizontalPadding = isMobile
+                      ? 14.0
+                      : isTablet
+                          ? 28.0
+                          : 46.0;
 
-                  final topPadding =
-                      isMobile
-                          ? 18.0
-                          : 28.0;
+                  final topPadding = isMobile ? 18.0 : 28.0;
 
                   return RefreshIndicator(
                     onRefresh: _loadHouse,
                     child: SingleChildScrollView(
-                      physics:
-                          const AlwaysScrollableScrollPhysics(
-                        parent:
-                            BouncingScrollPhysics(),
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
                       ),
                       padding: EdgeInsets.fromLTRB(
                         horizontalPadding,
@@ -170,8 +185,7 @@ class _HouseDetailScreenState
                       ),
                       child: Center(
                         child: ConstrainedBox(
-                          constraints:
-                              const BoxConstraints(
+                          constraints: const BoxConstraints(
                             maxWidth: 1540,
                           ),
                           child: isMobile
@@ -210,64 +224,46 @@ class _HouseDetailScreenState
     Color accentColor,
   ) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         HouseHeroCard(
           house: data.house,
           accentColor: accentColor,
           layout: HouseLayout.mobile,
         ),
-
         const SizedBox(height: 18),
-
         _PersonalInterpretationCard(
           data: data,
           accentColor: accentColor,
         ),
-
         const SizedBox(height: 18),
-
         HouseMeaningSection(
           house: data.house,
           accentColor: accentColor,
         ),
-
         const SizedBox(height: 18),
-
         HouseRulerSection(
           house: data.house,
-          rulerPlacement:
-              data.rulerPlacement,
+          rulerPlacement: data.rulerPlacement,
           accentColor: accentColor,
           compact: true,
         ),
-
         const SizedBox(height: 18),
-
         PlanetsInHouseSection(
           house: data.house,
           accentColor: accentColor,
         ),
-
-        if (data.interpretation
-            .planetInfluences.isNotEmpty) ...[
+        if (data.interpretation.planetInfluences.isNotEmpty) ...[
           const SizedBox(height: 18),
-
           _PlanetaryInfluencesCard(
-            influences: data.interpretation
-                .planetInfluences,
+            influences: data.interpretation.planetInfluences,
             accentColor: accentColor,
           ),
         ],
-
-        if (data.interpretation
-            .howThisMayShowUp.isNotEmpty) ...[
+        if (data.interpretation.howThisMayShowUp.isNotEmpty) ...[
           const SizedBox(height: 18),
-
           _HowThisMayShowUpCard(
-            items: data.interpretation
-                .howThisMayShowUp,
+            items: data.interpretation.howThisMayShowUp,
             accentColor: accentColor,
           ),
         ],
@@ -284,76 +280,55 @@ class _HouseDetailScreenState
     Color accentColor,
   ) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         HouseHeroCard(
           house: data.house,
           accentColor: accentColor,
           layout: HouseLayout.tablet,
         ),
-
         const SizedBox(height: 20),
-
         _PersonalInterpretationCard(
           data: data,
           accentColor: accentColor,
         ),
-
         const SizedBox(height: 20),
-
         Row(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: HouseMeaningSection(
                 house: data.house,
-                accentColor:
-                    accentColor,
+                accentColor: accentColor,
               ),
             ),
-
             const SizedBox(width: 18),
-
             Expanded(
               child: HouseRulerSection(
                 house: data.house,
-                rulerPlacement:
-                    data.rulerPlacement,
-                accentColor:
-                    accentColor,
+                rulerPlacement: data.rulerPlacement,
+                accentColor: accentColor,
                 compact: false,
               ),
             ),
           ],
         ),
-
         const SizedBox(height: 20),
-
         PlanetsInHouseSection(
           house: data.house,
           accentColor: accentColor,
         ),
-
-        if (data.interpretation
-            .planetInfluences.isNotEmpty) ...[
+        if (data.interpretation.planetInfluences.isNotEmpty) ...[
           const SizedBox(height: 20),
-
           _PlanetaryInfluencesCard(
-            influences: data.interpretation
-                .planetInfluences,
+            influences: data.interpretation.planetInfluences,
             accentColor: accentColor,
           ),
         ],
-
-        if (data.interpretation
-            .howThisMayShowUp.isNotEmpty) ...[
+        if (data.interpretation.howThisMayShowUp.isNotEmpty) ...[
           const SizedBox(height: 20),
-
           _HowThisMayShowUpCard(
-            items: data.interpretation
-                .howThisMayShowUp,
+            items: data.interpretation.howThisMayShowUp,
             accentColor: accentColor,
           ),
         ],
@@ -370,51 +345,39 @@ class _HouseDetailScreenState
     Color accentColor,
   ) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // --------------------------------------------------------
         // HERO + INFORMACIÓN TÉCNICA
         // --------------------------------------------------------
 
         Row(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               flex: 58,
               child: HouseHeroCard(
                 house: data.house,
-                accentColor:
-                    accentColor,
-                layout:
-                    HouseLayout.desktop,
+                accentColor: accentColor,
+                layout: HouseLayout.desktop,
               ),
             ),
-
             const SizedBox(width: 22),
-
             Expanded(
               flex: 42,
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   HouseRulerSection(
                     house: data.house,
-                    rulerPlacement:
-                        data.rulerPlacement,
-                    accentColor:
-                        accentColor,
+                    rulerPlacement: data.rulerPlacement,
+                    accentColor: accentColor,
                     compact: false,
                   ),
-
                   const SizedBox(height: 18),
-
                   PlanetsInHouseSection(
                     house: data.house,
-                    accentColor:
-                        accentColor,
+                    accentColor: accentColor,
                   ),
                 ],
               ),
@@ -440,30 +403,21 @@ class _HouseDetailScreenState
         // --------------------------------------------------------
 
         Row(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _InterpretationDetailCard(
-                eyebrow:
-                    data.interpretation.signTitle,
-                text: data.interpretation
-                    .signInterpretation,
-                accentColor:
-                    accentColor,
+                eyebrow: data.interpretation.signTitle,
+                text: data.interpretation.signInterpretation,
+                accentColor: accentColor,
               ),
             ),
-
             const SizedBox(width: 22),
-
             Expanded(
               child: _InterpretationDetailCard(
-                eyebrow:
-                    data.interpretation.rulerTitle,
-                text: data.interpretation
-                    .rulerInterpretation,
-                accentColor:
-                    accentColor,
+                eyebrow: data.interpretation.rulerTitle,
+                text: data.interpretation.rulerInterpretation,
+                accentColor: accentColor,
               ),
             ),
           ],
@@ -480,24 +434,18 @@ class _HouseDetailScreenState
           accentColor: accentColor,
         ),
 
-        if (data.interpretation
-            .planetInfluences.isNotEmpty) ...[
+        if (data.interpretation.planetInfluences.isNotEmpty) ...[
           const SizedBox(height: 24),
-
           _PlanetaryInfluencesCard(
-            influences: data.interpretation
-                .planetInfluences,
+            influences: data.interpretation.planetInfluences,
             accentColor: accentColor,
           ),
         ],
 
-        if (data.interpretation
-            .howThisMayShowUp.isNotEmpty) ...[
+        if (data.interpretation.howThisMayShowUp.isNotEmpty) ...[
           const SizedBox(height: 24),
-
           _HowThisMayShowUpCard(
-            items: data.interpretation
-                .howThisMayShowUp,
+            items: data.interpretation.howThisMayShowUp,
             accentColor: accentColor,
           ),
         ],
@@ -513,8 +461,7 @@ class _HouseDetailScreenState
     Color accentColor,
   ) {
     return Scaffold(
-      backgroundColor:
-          const Color(0xFFF4F1EE),
+      backgroundColor: const Color(0xFFF4F1EE),
       body: Center(
         child: CircularProgressIndicator(
           color: accentColor,
@@ -531,45 +478,37 @@ class _HouseDetailScreenState
     Color accentColor, {
     String? customMessage,
   }) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      backgroundColor:
-          const Color(0xFFF4F1EE),
+      backgroundColor: const Color(0xFFF4F1EE),
       body: Center(
         child: Padding(
-          padding:
-              const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisSize:
-                MainAxisSize.min,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.auto_awesome_outlined,
                 color: accentColor,
                 size: 44,
               ),
-
               const SizedBox(height: 16),
-
               Text(
                 customMessage ??
-                    _errorMessage ??
-                    'No fue posible cargar esta casa.',
-                textAlign:
-                    TextAlign.center,
+                    (_loadError != null
+                        ? describeError(context, _loadError!)
+                        : l10n.houseDetailLoadError),
+                textAlign: TextAlign.center,
               ),
-
               const SizedBox(height: 18),
-
               FilledButton(
                 onPressed: _loadHouse,
-                style:
-                    FilledButton.styleFrom(
-                  backgroundColor:
-                      accentColor,
+                style: FilledButton.styleFrom(
+                  backgroundColor: accentColor,
                 ),
-                child:
-                    const Text(
-                  'Reintentar',
+                child: Text(
+                  l10n.retry,
                 ),
               ),
             ],
@@ -584,8 +523,7 @@ class _HouseDetailScreenState
 // WHAT THIS MEANS FOR YOU
 // ============================================================
 
-class _PersonalInterpretationCard
-    extends StatelessWidget {
+class _PersonalInterpretationCard extends StatelessWidget {
   final HouseDetailModel data;
   final Color accentColor;
 
@@ -596,8 +534,7 @@ class _PersonalInterpretationCard
 
   @override
   Widget build(BuildContext context) {
-    final interpretation =
-        data.interpretation;
+    final interpretation = data.interpretation;
 
     return Container(
       width: double.infinity,
@@ -606,35 +543,28 @@ class _PersonalInterpretationCard
         accentColor,
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'WHAT THIS MEANS FOR YOU',
+            AppLocalizations.of(context)!.whatThisMeansForYouTitle,
             style: TextStyle(
               color: accentColor,
               fontSize: 12,
               letterSpacing: 2.2,
-              fontWeight:
-                  FontWeight.w700,
+              fontWeight: FontWeight.w700,
             ),
           ),
-
           const SizedBox(height: 18),
-
           Text(
             interpretation.summary,
             style: const TextStyle(
               color: Color(0xFF332735),
               fontSize: 15,
               height: 1.75,
-              fontWeight:
-                  FontWeight.w400,
+              fontWeight: FontWeight.w400,
             ),
           ),
-
           const SizedBox(height: 24),
-
           Container(
             width: 44,
             height: 2,
@@ -642,52 +572,38 @@ class _PersonalInterpretationCard
               alpha: 0.65,
             ),
           ),
-
           const SizedBox(height: 24),
-
           Text(
-            interpretation.signTitle
-                .toUpperCase(),
+            interpretation.signTitle.toUpperCase(),
             style: TextStyle(
               color: accentColor,
               fontSize: 11,
               letterSpacing: 1.5,
-              fontWeight:
-                  FontWeight.w700,
+              fontWeight: FontWeight.w700,
             ),
           ),
-
           const SizedBox(height: 10),
-
           Text(
-            interpretation
-                .signInterpretation,
+            interpretation.signInterpretation,
             style: const TextStyle(
               color: Color(0xFF625762),
               fontSize: 13,
               height: 1.65,
             ),
           ),
-
           const SizedBox(height: 22),
-
           Text(
-            interpretation.rulerTitle
-                .toUpperCase(),
+            interpretation.rulerTitle.toUpperCase(),
             style: TextStyle(
               color: accentColor,
               fontSize: 11,
               letterSpacing: 1.5,
-              fontWeight:
-                  FontWeight.w700,
+              fontWeight: FontWeight.w700,
             ),
           ),
-
           const SizedBox(height: 10),
-
           Text(
-            interpretation
-                .rulerInterpretation,
+            interpretation.rulerInterpretation,
             style: const TextStyle(
               color: Color(0xFF625762),
               fontSize: 13,
@@ -704,8 +620,7 @@ class _PersonalInterpretationCard
 // INTERPRETATION DETAIL
 // ============================================================
 
-class _InterpretationDetailCard
-    extends StatelessWidget {
+class _InterpretationDetailCard extends StatelessWidget {
   final String eyebrow;
   final String text;
   final Color accentColor;
@@ -724,8 +639,7 @@ class _InterpretationDetailCard
         accentColor,
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             eyebrow.toUpperCase(),
@@ -733,13 +647,10 @@ class _InterpretationDetailCard
               color: accentColor,
               fontSize: 11,
               letterSpacing: 1.6,
-              fontWeight:
-                  FontWeight.w700,
+              fontWeight: FontWeight.w700,
             ),
           ),
-
           const SizedBox(height: 14),
-
           Text(
             text,
             style: const TextStyle(
@@ -758,10 +669,8 @@ class _InterpretationDetailCard
 // PLANETARY INFLUENCES
 // ============================================================
 
-class _PlanetaryInfluencesCard
-    extends StatelessWidget {
-  final List<PlanetInfluenceModel>
-      influences;
+class _PlanetaryInfluencesCard extends StatelessWidget {
+  final List<PlanetInfluenceModel> influences;
 
   final Color accentColor;
 
@@ -779,84 +688,63 @@ class _PlanetaryInfluencesCard
         accentColor,
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'PLANETARY INFLUENCES',
+            AppLocalizations.of(context)!.planetaryInfluencesTitle,
             style: TextStyle(
               color: accentColor,
               fontSize: 12,
               letterSpacing: 2,
-              fontWeight:
-                  FontWeight.w700,
+              fontWeight: FontWeight.w700,
             ),
           ),
-
           const SizedBox(height: 22),
-
           ...List.generate(
             influences.length,
             (index) {
-              final influence =
-                  influences[index];
+              final influence = influences[index];
 
               return Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
                         width: 38,
                         child: Text(
                           influence.symbol,
                           style: TextStyle(
-                            color:
-                                accentColor,
+                            color: accentColor,
                             fontSize: 25,
                             height: 1,
                           ),
                         ),
                       ),
-
                       const SizedBox(
                         width: 10,
                       ),
-
                       Expanded(
                         child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment
-                                  .start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              influence.title
-                                  .toUpperCase(),
+                              influence.title.toUpperCase(),
                               style: const TextStyle(
-                                color:
-                                    Color(0xFF2D2130),
+                                color: Color(0xFF2D2130),
                                 fontSize: 13,
-                                letterSpacing:
-                                    .8,
-                                fontWeight:
-                                    FontWeight.w700,
+                                letterSpacing: .8,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-
                             const SizedBox(
                               height: 8,
                             ),
-
                             Text(
-                              influence
-                                  .interpretation,
-                              style:
-                                  const TextStyle(
-                                color:
-                                    Color(0xFF6D626C),
+                              influence.interpretation,
+                              style: const TextStyle(
+                                color: Color(0xFF6D626C),
                                 fontSize: 12.5,
                                 height: 1.65,
                               ),
@@ -866,22 +754,16 @@ class _PlanetaryInfluencesCard
                       ),
                     ],
                   ),
-
-                  if (index <
-                      influences.length -
-                          1) ...[
+                  if (index < influences.length - 1) ...[
                     const SizedBox(
                       height: 20,
                     ),
-
                     Divider(
                       height: 1,
-                      color: accentColor
-                          .withValues(
+                      color: accentColor.withValues(
                         alpha: 0.12,
                       ),
                     ),
-
                     const SizedBox(
                       height: 20,
                     ),
@@ -900,8 +782,7 @@ class _PlanetaryInfluencesCard
 // HOW THIS MAY SHOW UP
 // ============================================================
 
-class _HowThisMayShowUpCard
-    extends StatelessWidget {
+class _HowThisMayShowUpCard extends StatelessWidget {
   final List<String> items;
   final Color accentColor;
 
@@ -919,58 +800,45 @@ class _HowThisMayShowUpCard
         accentColor,
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'HOW THIS MAY SHOW UP',
+            AppLocalizations.of(context)!.howThisMayShowUpTitle,
             style: TextStyle(
               color: accentColor,
               fontSize: 12,
               letterSpacing: 2,
-              fontWeight:
-                  FontWeight.w700,
+              fontWeight: FontWeight.w700,
             ),
           ),
-
           const SizedBox(height: 20),
-
           ...items.map(
             (item) => Padding(
-              padding:
-                  const EdgeInsets.only(
+              padding: const EdgeInsets.only(
                 bottom: 13,
               ),
               child: Row(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     width: 6,
                     height: 6,
-                    margin:
-                        const EdgeInsets.only(
+                    margin: const EdgeInsets.only(
                       top: 7,
                     ),
-                    decoration:
-                        BoxDecoration(
+                    decoration: BoxDecoration(
                       color: accentColor,
-                      shape:
-                          BoxShape.circle,
+                      shape: BoxShape.circle,
                     ),
                   ),
-
                   const SizedBox(
                     width: 12,
                   ),
-
                   Expanded(
                     child: Text(
                       item,
-                      style:
-                          const TextStyle(
-                        color:
-                            Color(0xFF625762),
+                      style: const TextStyle(
+                        color: Color(0xFF625762),
                         fontSize: 13,
                         height: 1.55,
                       ),
@@ -997,8 +865,7 @@ BoxDecoration _cardDecoration(
     color: Colors.white.withValues(
       alpha: 0.86,
     ),
-    borderRadius:
-        BorderRadius.circular(20),
+    borderRadius: BorderRadius.circular(20),
     border: Border.all(
       color: accentColor.withValues(
         alpha: 0.10,

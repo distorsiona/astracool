@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/natal_chart_model.dart';
 import '../../../utils/astrology_symbols.dart';
 import '../../../theme/card_decorations.dart';
-import '../helpers/strength_format.dart';
 import 'section_card.dart';
 
 class InfluencesSection extends StatelessWidget {
@@ -20,11 +21,12 @@ class InfluencesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final supportive = house.supportiveInfluences;
     final challenging = house.challengingInfluences;
 
     return SectionCard(
-      title: 'INFLUENCES',
+      title: l10n.influencesTitle,
       accentColor: accentColor,
       child: compact
           ? Column(
@@ -32,7 +34,7 @@ class InfluencesSection extends StatelessWidget {
               children: [
                 if (supportive.isNotEmpty)
                   InfluenceGroup(
-                    title: 'SUPPORTIVE',
+                    title: l10n.supportiveLabel,
                     influences: supportive,
                     accentColor: accentColor,
                   ),
@@ -40,7 +42,7 @@ class InfluencesSection extends StatelessWidget {
                   const SizedBox(height: 22),
                 if (challenging.isNotEmpty)
                   InfluenceGroup(
-                    title: 'CHALLENGING',
+                    title: l10n.challengingLabel,
                     influences: challenging,
                     accentColor: accentColor,
                   ),
@@ -57,7 +59,7 @@ class InfluencesSection extends StatelessWidget {
                     children: [
                       Expanded(
                         child: InfluenceGroup(
-                          title: 'SUPPORTIVE',
+                          title: l10n.supportiveLabel,
                           influences: supportive,
                           accentColor: accentColor,
                         ),
@@ -71,7 +73,7 @@ class InfluencesSection extends StatelessWidget {
                       const SizedBox(width: 24),
                       Expanded(
                         child: InfluenceGroup(
-                          title: 'CHALLENGING',
+                          title: l10n.challengingLabel,
                           influences: challenging,
                           accentColor: accentColor,
                         ),
@@ -85,7 +87,7 @@ class InfluencesSection extends StatelessWidget {
                   children: [
                     if (supportive.isNotEmpty)
                       InfluenceGroup(
-                        title: 'SUPPORTIVE',
+                        title: l10n.supportiveLabel,
                         influences: supportive,
                         accentColor: accentColor,
                       ),
@@ -93,7 +95,7 @@ class InfluencesSection extends StatelessWidget {
                       const SizedBox(height: 22),
                     if (challenging.isNotEmpty)
                       InfluenceGroup(
-                        title: 'CHALLENGING',
+                        title: l10n.challengingLabel,
                         influences: challenging,
                         accentColor: accentColor,
                       ),
@@ -172,8 +174,9 @@ class InfluenceRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${influence.first} ${aspectName(influence.type)} '
-                  '${influence.second}',
+                  '${localizedPlanetName(context, influence.first)} '
+                  '${localizedAspectName(context, influence.type)} '
+                  '${localizedPlanetName(context, influence.second)}',
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -186,7 +189,7 @@ class InfluenceRow extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${formatAstrologyDegree(influence.orb)} · '
-                  '${prettyStrength(influence.strength)}',
+                  '${localizedStrength(context, influence.strength)}',
                   style: const TextStyle(
                     color: Color(0xFF817380),
                     fontSize: 10.5,

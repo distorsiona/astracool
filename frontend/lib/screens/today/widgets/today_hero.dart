@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../l10n/today_labels.dart';
 import '../../../models/today_model.dart';
 import '../../../theme/card_decorations.dart';
 import 'today_title_line.dart';
@@ -18,6 +21,8 @@ class TodayHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       decoration: cardDecoration(),
@@ -26,7 +31,7 @@ class TodayHero extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              'TODAY',
+              l10n.todayHeroTitle,
               style: TextStyle(
                 color: accentColor,
                 fontFamily: 'Gothica2',
@@ -73,7 +78,9 @@ class TodayHero extends StatelessWidget {
             ),
             const SizedBox(height: 22),
             Text(
-              'MOON IN ${data.moonSign.toUpperCase()}',
+              l10n.moonInSign(
+                localizedSignName(context, data.moonSign).toUpperCase(),
+              ),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: accentColor,
@@ -84,7 +91,11 @@ class TodayHero extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              data.moonSubtitle,
+              localizedTodayMoonSubtitle(
+                context,
+                data.moonSign,
+                data.moonSubtitle,
+              ),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Color(0xFF756B72),
@@ -94,12 +105,12 @@ class TodayHero extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             TodayTitleLine(
-              title: 'YOUR ENERGY TODAY',
+              title: l10n.todayEnergyTitle,
               accentColor: accentColor,
             ),
             const SizedBox(height: 22),
             Text(
-              data.interpretation,
+              localizedTodayInterpretation(context, data),
               style: const TextStyle(
                 color: Color(0xFF332C32),
                 fontSize: 14,
@@ -111,7 +122,7 @@ class TodayHero extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  '“${data.quote}”',
+                  '“${localizedTodayQuote(context, data.moonSign, data.quote)}”',
                   style: TextStyle(
                     color: accentColor,
                     fontSize: 13,

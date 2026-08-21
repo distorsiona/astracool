@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/error_messages.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../models/today_model.dart';
 import '../services/api_service.dart';
 import '../theme/zodiac_theme.dart';
 import '../widgets/astrology_top_navigation.dart';
 
+import 'account_profile_screen.dart';
 import 'chart_screen.dart';
 import 'profile_screen.dart';
 
@@ -18,7 +21,10 @@ import 'today/widgets/transits_card.dart';
 class TodayScreen extends StatefulWidget {
   final String userId;
 
-  const TodayScreen({super.key, required this.userId});
+  const TodayScreen({
+    super.key,
+    required this.userId,
+  });
 
   @override
   State<TodayScreen> createState() => _TodayScreenState();
@@ -28,55 +34,112 @@ class _TodayScreenState extends State<TodayScreen> {
   TodayModel? data;
 
   bool loading = true;
-  String? errorMessage;
+  Object? loadError;
 
   @override
   void initState() {
     super.initState();
+
     _load();
   }
+
+  // ============================================================
+  // API
+  // ============================================================
 
   Future<void> _load() async {
     setState(() {
       loading = true;
-      errorMessage = null;
+      loadError = null;
     });
 
     try {
-      final result = await ApiService.getToday(userId: widget.userId);
+      final result = await ApiService.getToday(
+        userId: widget.userId,
+      );
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         data = result;
         loading = false;
       });
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         loading = false;
-        errorMessage = error.toString();
+        loadError = error;
       });
     }
   }
+
+  // ============================================================
+  // NAVIGATION
+  // ============================================================
+
+  void _goToChart() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChartScreen(
+          userId: widget.userId,
+        ),
+      ),
+    );
+  }
+
+  void _goToProfile() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ProfileScreen(
+          userId: widget.userId,
+        ),
+      ),
+    );
+  }
+
+  void _goToAccountProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AccountProfileScreen(
+          userId: widget.userId,
+          zodiacSign: data?.bigThree.sun,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // BUILD
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
     if (loading) {
       return const Scaffold(
         backgroundColor: Color(0xFFF6F2EF),
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
       );
     }
 
-    if (errorMessage != null || data == null) {
+    if (loadError != null || data == null) {
       return _error();
     }
 
     final today = data!;
 
-    final accentColor = ZodiacTheme.colorForSign(today.bigThree.sun);
+    final accentColor = ZodiacTheme.colorForSign(
+      today.bigThree.sun,
+    );
 
     final width = MediaQuery.sizeOf(context).width;
 
@@ -92,25 +155,23 @@ class _TodayScreenState extends State<TodayScreen> {
             AstrologyTopNavigation(
               activeSection: AstrologySection.today,
               accentColor: accentColor,
+
+              // ya estamos en today
               onToday: () {},
-              onChart: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ChartScreen(userId: widget.userId),
-                  ),
-                );
-              },
+
+              // chart
+              onChart: _goToChart,
+
+              // week todavía pendiente
               onWeek: () {},
-              onProfile: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ProfileScreen(userId: widget.userId),
-                  ),
-                );
-              },
+
+              // me
+              onProfile: _goToProfile,
+
+              // account settings
+              onAccountProfile: _goToAccountProfile,
             ),
+
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -130,12 +191,23 @@ class _TodayScreenState extends State<TodayScreen> {
                 ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1200),
+                    constraints: const BoxConstraints(
+                      maxWidth: 1200,
+                    ),
                     child: mobile
-                        ? _mobile(today, accentColor)
+                        ? _mobile(
+                            today,
+                            accentColor,
+                          )
                         : tablet
-                            ? _tablet(today, accentColor)
-                            : _desktop(today, accentColor),
+                            ? _tablet(
+                                today,
+                                accentColor,
+                              )
+                            : _desktop(
+                                today,
+                                accentColor,
+                              ),
                   ),
                 ),
               ),
@@ -150,7 +222,10 @@ class _TodayScreenState extends State<TodayScreen> {
   // DESKTOP
   // ============================================================
 
-  Widget _desktop(TodayModel today, Color accentColor) {
+  Widget _desktop(
+    TodayModel today,
+    Color accentColor,
+  ) {
     return Column(
       children: [
         Row(
@@ -158,9 +233,14 @@ class _TodayScreenState extends State<TodayScreen> {
           children: [
             Expanded(
               flex: 44,
-              child: TodayHero(data: today, accentColor: accentColor),
+              child: TodayHero(
+                data: today,
+                accentColor: accentColor,
+              ),
             ),
+
             const SizedBox(width: 18),
+
             Expanded(
               flex: 56,
               child: Column(
@@ -169,7 +249,9 @@ class _TodayScreenState extends State<TodayScreen> {
                     data: today.bigThree,
                     accentColor: accentColor,
                   ),
+
                   const SizedBox(height: 18),
+
                   TransitsCard(
                     transits: today.transits,
                     accentColor: accentColor,
@@ -179,7 +261,9 @@ class _TodayScreenState extends State<TodayScreen> {
             ),
           ],
         ),
+
         const SizedBox(height: 18),
+
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -189,17 +273,26 @@ class _TodayScreenState extends State<TodayScreen> {
                 accentColor: accentColor,
               ),
             ),
+
             const SizedBox(width: 18),
+
             Expanded(
-              child: ThemesCard(themes: today.themes, accentColor: accentColor),
+              child: ThemesCard(
+                themes: today.themes,
+                accentColor: accentColor,
+              ),
             ),
           ],
         ),
+
         const SizedBox(height: 18),
+
         BottomSummary(
           focus: today.focus,
           luckyTime: today.luckyTime,
           luckyColor: today.luckyColor,
+          moonSign: today.moonSign,
+          transits: today.transits,
           accentColor: accentColor,
         ),
       ],
@@ -210,15 +303,33 @@ class _TodayScreenState extends State<TodayScreen> {
   // TABLET
   // ============================================================
 
-  Widget _tablet(TodayModel today, Color accentColor) {
+  Widget _tablet(
+    TodayModel today,
+    Color accentColor,
+  ) {
     return Column(
       children: [
-        TodayHero(data: today, accentColor: accentColor),
+        TodayHero(
+          data: today,
+          accentColor: accentColor,
+        ),
+
         const SizedBox(height: 18),
-        BigThreeToday(data: today.bigThree, accentColor: accentColor),
+
+        BigThreeToday(
+          data: today.bigThree,
+          accentColor: accentColor,
+        ),
+
         const SizedBox(height: 18),
-        TransitsCard(transits: today.transits, accentColor: accentColor),
+
+        TransitsCard(
+          transits: today.transits,
+          accentColor: accentColor,
+        ),
+
         const SizedBox(height: 18),
+
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -228,17 +339,26 @@ class _TodayScreenState extends State<TodayScreen> {
                 accentColor: accentColor,
               ),
             ),
+
             const SizedBox(width: 18),
+
             Expanded(
-              child: ThemesCard(themes: today.themes, accentColor: accentColor),
+              child: ThemesCard(
+                themes: today.themes,
+                accentColor: accentColor,
+              ),
             ),
           ],
         ),
+
         const SizedBox(height: 18),
+
         BottomSummary(
           focus: today.focus,
           luckyTime: today.luckyTime,
           luckyColor: today.luckyColor,
+          moonSign: today.moonSign,
+          transits: today.transits,
           accentColor: accentColor,
         ),
       ],
@@ -249,30 +369,55 @@ class _TodayScreenState extends State<TodayScreen> {
   // MOBILE
   // ============================================================
 
-  Widget _mobile(TodayModel today, Color accentColor) {
+  Widget _mobile(
+    TodayModel today,
+    Color accentColor,
+  ) {
     return Column(
       children: [
-        TodayHero(data: today, accentColor: accentColor, mobile: true),
+        TodayHero(
+          data: today,
+          accentColor: accentColor,
+          mobile: true,
+        ),
+
         const SizedBox(height: 14),
-        BigThreeToday(data: today.bigThree, accentColor: accentColor),
+
+        BigThreeToday(
+          data: today.bigThree,
+          accentColor: accentColor,
+        ),
+
         const SizedBox(height: 14),
+
         TransitsCard(
           transits: today.transits,
           accentColor: accentColor,
           mobile: true,
         ),
+
         const SizedBox(height: 14),
+
         AffectedHousesCard(
           houses: today.affectedHouses,
           accentColor: accentColor,
         ),
+
         const SizedBox(height: 14),
-        ThemesCard(themes: today.themes, accentColor: accentColor),
+
+        ThemesCard(
+          themes: today.themes,
+          accentColor: accentColor,
+        ),
+
         const SizedBox(height: 14),
+
         BottomSummary(
           focus: today.focus,
           luckyTime: today.luckyTime,
           luckyColor: today.luckyColor,
+          moonSign: today.moonSign,
+          transits: today.transits,
           accentColor: accentColor,
           mobile: true,
         ),
@@ -280,7 +425,13 @@ class _TodayScreenState extends State<TodayScreen> {
     );
   }
 
+  // ============================================================
+  // ERROR
+  // ============================================================
+
   Widget _error() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F2EF),
       body: Center(
@@ -289,14 +440,31 @@ class _TodayScreenState extends State<TodayScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.auto_awesome_outlined, size: 48),
+              const Icon(
+                Icons.auto_awesome_outlined,
+                size: 48,
+              ),
+
               const SizedBox(height: 15),
+
               Text(
-                errorMessage ?? 'No fue posible cargar TODAY.',
+                loadError != null
+                    ? describeError(
+                        context,
+                        loadError!,
+                      )
+                    : l10n.todayLoadError,
                 textAlign: TextAlign.center,
               ),
+
               const SizedBox(height: 20),
-              FilledButton(onPressed: _load, child: const Text('Reintentar')),
+
+              FilledButton(
+                onPressed: _load,
+                child: Text(
+                  l10n.retry,
+                ),
+              ),
             ],
           ),
         ),

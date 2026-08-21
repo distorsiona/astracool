@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -9,41 +10,51 @@ import '../models/natal_chart_model.dart';
 import '../models/today_model.dart';
 import '../models/house_model.dart';
 import '../models/house_detail_model.dart';
-
+import '../models/account_profile_model.dart';
 
 // ============================================================
 // error personalizado para las llamadas a la api
 //
-// así todas las pantallas reciben errores
-// con mensajes entendibles y consistentes.
+// "code" identifica el tipo de error (para mostrar un mensaje
+// localizado genérico), y "backendDetail" guarda el mensaje que
+// FastAPI haya mandado en su campo "detail", si lo hay.
+//
+// backendDetail viene tal cual del backend: NO se traduce en
+// Flutter, porque es contenido que no controlamos acá.
 // ============================================================
 
+enum ApiErrorCode {
+  network,
+  timeout,
+  invalidResponse,
+  requestFailed,
+}
+
 class ApiException implements Exception {
-  final String message;
+  final ApiErrorCode code;
+  final String? backendDetail;
 
   const ApiException(
-    this.message,
-  );
+    this.code, {
+    this.backendDetail,
+  });
 
   @override
   String toString() {
-    return message;
+    return backendDetail ?? code.name;
   }
 }
-
 
 // ============================================================
 // servicio principal para comunicarse con el backend
 // ============================================================
 
 class ApiService {
-
   // ==========================================================
   // análisis astrológico usando datos de nacimiento
   // ==========================================================
 
-  static Future<ZodiacProfileModel>
-      getAstraProfile({
+  static Future<ZodiacProfileModel> getAstraProfile({
     required BirthDataModel birthData,
   }) async {
     final Uri uri = Uri.parse(
@@ -55,10 +66,8 @@ class ApiService {
           .post(
             uri,
             headers: {
-              'Content-Type':
-                  'application/json',
-              'Accept':
-                  'application/json',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
             },
             body: jsonEncode(
               birthData.toJson(),
@@ -70,51 +79,42 @@ class ApiService {
             ),
           );
 
-      if (
-          response.statusCode < 200 ||
-          response.statusCode >= 300) {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ApiException(
-          _extractError(
-            response,
-          ),
+          ApiErrorCode.requestFailed,
+          backendDetail: _extractErrorDetail(response),
         );
       }
 
-      final dynamic decoded =
-          jsonDecode(
+      final dynamic decoded = jsonDecode(
         response.body,
       );
 
-      if (decoded
-          is! Map<String, dynamic>) {
+      if (decoded is! Map<String, dynamic>) {
         throw const ApiException(
-          'La API devolvió un formato inesperado.',
+          ApiErrorCode.invalidResponse,
         );
       }
 
-      return ZodiacProfileModel
-          .fromAstraJson(
+      return ZodiacProfileModel.fromAstraJson(
         decoded,
       );
-    } catch (error) {
-      if (error
-          is ApiException) {
-        rethrow;
-      }
-
-      throw ApiException(
-        'No fue posible conectar con Astra API: $error',
-      );
+    } on ApiException {
+      rethrow;
+    } on TimeoutException {
+      throw const ApiException(ApiErrorCode.timeout);
+    } on FormatException {
+      throw const ApiException(ApiErrorCode.invalidResponse);
+    } catch (_) {
+      throw const ApiException(ApiErrorCode.network);
     }
   }
-
 
   // ==========================================================
   // perfil real del usuario
   // ==========================================================
 
-  static Future<ZodiacProfileModel>
-      getProfile({
+  static Future<ZodiacProfileModel> getProfile({
     required String userId,
   }) async {
     final Uri uri = Uri.parse(
@@ -122,126 +122,104 @@ class ApiService {
     );
 
     try {
-      final response = await http
-          .get(
-            uri,
-            headers: {
-              'Accept':
-                  'application/json',
-            },
-          )
-          .timeout(
-            const Duration(
-              seconds: 30,
-            ),
-          );
+      final response = await http.get(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+        },
+      ).timeout(
+        const Duration(
+          seconds: 30,
+        ),
+      );
 
-      if (
-          response.statusCode < 200 ||
-          response.statusCode >= 300) {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ApiException(
-          _extractError(
-            response,
-          ),
+          ApiErrorCode.requestFailed,
+          backendDetail: _extractErrorDetail(response),
         );
       }
 
-      final dynamic decoded =
-          jsonDecode(
+      final dynamic decoded = jsonDecode(
         response.body,
       );
 
-      if (decoded
-          is! Map<String, dynamic>) {
+      if (decoded is! Map<String, dynamic>) {
         throw const ApiException(
-          'El backend devolvió un perfil con formato inesperado.',
+          ApiErrorCode.invalidResponse,
         );
       }
 
-      return ZodiacProfileModel
-          .fromJson(
+      return ZodiacProfileModel.fromJson(
         decoded,
       );
-    } catch (error) {
-      if (error
-          is ApiException) {
-        rethrow;
-      }
-
-      throw ApiException(
-        'No fue posible conectar con el backend: $error',
-      );
+    } on ApiException {
+      rethrow;
+    } on TimeoutException {
+      throw const ApiException(ApiErrorCode.timeout);
+    } on FormatException {
+      throw const ApiException(ApiErrorCode.invalidResponse);
+    } catch (_) {
+      throw const ApiException(ApiErrorCode.network);
     }
   }
-
 
   // ==========================================================
   // carta natal completa del usuario
   // ==========================================================
 
-  static Future<NatalChartModel>
-      getChart({
+  static Future<NatalChartModel> getChart({
     required String userId,
+    required String language,
   }) async {
     final Uri uri = Uri.parse(
       '${ApiConfig.baseUrl}'
       '/api/chart/'
       '$userId',
-    );
+    ).replace(queryParameters: {'lang': language});
 
     try {
-      final response = await http
-          .get(
-            uri,
-            headers: {
-              'Accept':
-                  'application/json',
-            },
-          )
-          .timeout(
-            const Duration(
-              seconds: 30,
-            ),
-          );
+      final response = await http.get(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+        },
+      ).timeout(
+        const Duration(
+          seconds: 30,
+        ),
+      );
 
-      if (
-          response.statusCode < 200 ||
-          response.statusCode >= 300) {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ApiException(
-          _extractError(
-            response,
-          ),
+          ApiErrorCode.requestFailed,
+          backendDetail: _extractErrorDetail(response),
         );
       }
 
-      final dynamic decoded =
-          jsonDecode(
+      final dynamic decoded = jsonDecode(
         response.body,
       );
 
-      if (decoded
-          is! Map<String, dynamic>) {
+      if (decoded is! Map<String, dynamic>) {
         throw const ApiException(
-          'El backend devolvió una carta natal inválida.',
+          ApiErrorCode.invalidResponse,
         );
       }
 
-      return NatalChartModel
-          .fromJson(
+      return NatalChartModel.fromJson(
         decoded,
       );
-    } catch (error) {
-      if (error
-          is ApiException) {
-        rethrow;
-      }
-
-      throw ApiException(
-        'No fue posible conectar con la carta natal: $error',
-      );
+    } on ApiException {
+      rethrow;
+    } on TimeoutException {
+      throw const ApiException(ApiErrorCode.timeout);
+    } on FormatException {
+      throw const ApiException(ApiErrorCode.invalidResponse);
+    } catch (_) {
+      throw const ApiException(ApiErrorCode.network);
     }
   }
-
 
   // ==========================================================
   // detalle de una casa específica
@@ -257,8 +235,7 @@ class ApiService {
   // /api/chart/user/chart/houses/1
   // ==========================================================
 
-  static Future<ChartHouse>
-      getChartHouse({
+  static Future<ChartHouse> getChartHouse({
     required String userId,
     required String chartId,
     required int houseNumber,
@@ -273,48 +250,39 @@ class ApiService {
     );
 
     try {
-      final response = await http
-          .get(
-            uri,
-            headers: {
-              'Accept':
-                  'application/json',
-            },
-          )
-          .timeout(
-            const Duration(
-              seconds: 30,
-            ),
-          );
+      final response = await http.get(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+        },
+      ).timeout(
+        const Duration(
+          seconds: 30,
+        ),
+      );
 
-      if (
-          response.statusCode < 200 ||
-          response.statusCode >= 300) {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ApiException(
-          _extractError(
-            response,
-          ),
+          ApiErrorCode.requestFailed,
+          backendDetail: _extractErrorDetail(response),
         );
       }
 
-      final dynamic decoded =
-          jsonDecode(
+      final dynamic decoded = jsonDecode(
         response.body,
       );
 
-      if (decoded
-          is! Map<String, dynamic>) {
+      if (decoded is! Map<String, dynamic>) {
         throw const ApiException(
-          'El backend devolvió una casa con formato inesperado.',
+          ApiErrorCode.invalidResponse,
         );
       }
 
-      final dynamic houseJson =
-          decoded['house'];
+      final dynamic houseJson = decoded['house'];
 
       if (houseJson is! Map) {
         throw const ApiException(
-          'La API no entregó información válida para esta casa.',
+          ApiErrorCode.invalidResponse,
         );
       }
 
@@ -323,25 +291,22 @@ class ApiService {
           houseJson,
         ),
       );
-    } catch (error) {
-      if (error
-          is ApiException) {
-        rethrow;
-      }
-
-      throw ApiException(
-        'No fue posible cargar la casa $houseNumber: $error',
-      );
+    } on ApiException {
+      rethrow;
+    } on TimeoutException {
+      throw const ApiException(ApiErrorCode.timeout);
+    } on FormatException {
+      throw const ApiException(ApiErrorCode.invalidResponse);
+    } catch (_) {
+      throw const ApiException(ApiErrorCode.network);
     }
   }
-
 
   // ==========================================================
   // energía astrológica de hoy
   // ==========================================================
 
-  static Future<TodayModel>
-      getToday({
+  static Future<TodayModel> getToday({
     required String userId,
   }) async {
     final Uri uri = Uri.parse(
@@ -351,60 +316,50 @@ class ApiService {
     );
 
     try {
-      final response = await http
-          .get(
-            uri,
-            headers: {
-              'Accept':
-                  'application/json',
-            },
-          )
-          .timeout(
-            const Duration(
-              seconds: 30,
-            ),
-          );
+      final response = await http.get(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+        },
+      ).timeout(
+        const Duration(
+          seconds: 30,
+        ),
+      );
 
-      if (
-          response.statusCode < 200 ||
-          response.statusCode >= 300) {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ApiException(
-          _extractError(
-            response,
-          ),
+          ApiErrorCode.requestFailed,
+          backendDetail: _extractErrorDetail(response),
         );
       }
 
-      final dynamic decoded =
-          jsonDecode(
+      final dynamic decoded = jsonDecode(
         response.body,
       );
 
-      if (decoded
-          is! Map<String, dynamic>) {
+      if (decoded is! Map<String, dynamic>) {
         throw const ApiException(
-          'El servidor devolvió datos inválidos.',
+          ApiErrorCode.invalidResponse,
         );
       }
 
       return TodayModel.fromJson(
         decoded,
       );
-    } catch (error) {
-      if (error
-          is ApiException) {
-        rethrow;
-      }
-
-      throw ApiException(
-        'No fue posible cargar tu energía de hoy: $error',
-      );
+    } on ApiException {
+      rethrow;
+    } on TimeoutException {
+      throw const ApiException(ApiErrorCode.timeout);
+    } on FormatException {
+      throw const ApiException(ApiErrorCode.invalidResponse);
+    } catch (_) {
+      throw const ApiException(ApiErrorCode.network);
     }
   }
 
-
   // ==========================================================
-  // obtener el mensaje real de error que manda fastapi
+  // obtener el detail que manda fastapi en sus errores
   //
   // normalmente fastapi responde algo como:
   //
@@ -412,45 +367,139 @@ class ApiService {
   //   "detail": "mensaje del error"
   // }
   //
-  // esta función intenta recuperar ese detail.
+  // si no hay un detail usable, devolvemos null: la UI mostrará
+  // en ese caso un mensaje localizado genérico.
   // ==========================================================
 
-  static String _extractError(
+  static String? _extractErrorDetail(
     http.Response response,
   ) {
     try {
-      final dynamic decoded =
-          jsonDecode(
+      final dynamic decoded = jsonDecode(
         response.body,
       );
 
-      if (decoded
-          is Map<String, dynamic>) {
-        final dynamic detail =
-            decoded['detail'];
+      if (decoded is Map<String, dynamic>) {
+        final dynamic detail = decoded['detail'];
 
         if (detail != null) {
-          return detail
-              .toString();
+          return detail.toString();
         }
       }
     } catch (_) {
-      // si la respuesta no era json
-      // simplemente usamos el mensaje
-      // general que está más abajo.
+      // si la respuesta no era json,
+      // no hay detail que extraer.
     }
 
-    return (
-      'Error ${response.statusCode} '
-      'al consultar Astra API.'
-    );
+    return null;
   }
 
-    Future<HousesResponseModel> getHouses(
+  Future<HousesResponseModel> getHouses(
+    String userId, {
+    required String language,
+  }) async {
+    final uri = Uri.parse(
+      ApiConfig.houses(userId, lang: language),
+    );
+
+    try {
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ).timeout(
+        const Duration(seconds: 15),
+      );
+
+      if (response.statusCode != 200) {
+        throw ApiException(
+          ApiErrorCode.requestFailed,
+          backendDetail: _extractErrorDetail(response),
+        );
+      }
+
+      final decoded = jsonDecode(
+        response.body,
+      );
+
+      if (decoded is! Map<String, dynamic>) {
+        throw const ApiException(
+          ApiErrorCode.invalidResponse,
+        );
+      }
+
+      return HousesResponseModel.fromJson(
+        decoded,
+      );
+    } on ApiException {
+      rethrow;
+    } on TimeoutException {
+      throw const ApiException(ApiErrorCode.timeout);
+    } on FormatException {
+      throw const ApiException(ApiErrorCode.invalidResponse);
+    } catch (_) {
+      throw const ApiException(ApiErrorCode.network);
+    }
+  }
+
+  Future<HouseDetailModel> getHouseDetail(
+    String userId,
+    int houseNumber, {
+    required String language,
+  }) async {
+    final uri = Uri.parse(
+      ApiConfig.houseDetail(
+        userId,
+        houseNumber,
+        lang: language,
+      ),
+    );
+
+    try {
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ).timeout(
+        const Duration(seconds: 15),
+      );
+
+      if (response.statusCode != 200) {
+        throw ApiException(
+          ApiErrorCode.requestFailed,
+          backendDetail: _extractErrorDetail(response),
+        );
+      }
+
+      final decoded = jsonDecode(response.body);
+
+      if (decoded is! Map<String, dynamic>) {
+        throw const ApiException(
+          ApiErrorCode.invalidResponse,
+        );
+      }
+
+      return HouseDetailModel.fromJson(decoded);
+    } on ApiException {
+      rethrow;
+    } on TimeoutException {
+      throw const ApiException(ApiErrorCode.timeout);
+    } on FormatException {
+      throw const ApiException(ApiErrorCode.invalidResponse);
+    } catch (_) {
+      throw const ApiException(ApiErrorCode.network);
+    }
+  }
+
+  Future<AccountProfileModel> getAccountProfile(
     String userId,
   ) async {
     final uri = Uri.parse(
-      ApiConfig.houses(userId),
+      ApiConfig.accountProfile(userId),
     );
 
     final response = await http.get(
@@ -465,7 +514,7 @@ class ApiService {
 
     if (response.statusCode != 200) {
       throw Exception(
-        'Error loading houses: '
+        'Error loading account profile: '
         '${response.statusCode} ${response.body}',
       );
     }
@@ -476,51 +525,70 @@ class ApiService {
 
     if (decoded is! Map<String, dynamic>) {
       throw Exception(
-        'Invalid houses response.',
+        'Invalid account profile response.',
       );
     }
 
-    return HousesResponseModel.fromJson(
+    return AccountProfileModel.fromJson(
       decoded,
     );
   }
 
-    Future<HouseDetailModel> getHouseDetail(
-    String userId,
-    int houseNumber,
-  ) async {
+  Future<AccountProfileUpdateModel> updateAccountProfile({
+    required String userId,
+    required String displayName,
+    required String username,
+  }) async {
     final uri = Uri.parse(
-      ApiConfig.houseDetail(
-        userId,
-        houseNumber,
-      ),
+      ApiConfig.accountProfile(userId),
     );
 
-    final response = await http.get(
-      uri,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    ).timeout(
-      const Duration(seconds: 15),
-    );
+    final response = await http
+        .patch(
+          uri,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: jsonEncode({
+            'display_name': displayName,
+            'username': username,
+          }),
+        )
+        .timeout(
+          const Duration(seconds: 15),
+        );
 
-    if (response.statusCode != 200) {
-      throw Exception(
-        'Error loading house detail: '
-        '${response.statusCode} ${response.body}',
-      );
+    dynamic decoded;
+
+    try {
+      decoded = jsonDecode(response.body);
+    } catch (_) {
+      decoded = null;
     }
 
-    final decoded = jsonDecode(response.body);
+    if (response.statusCode != 200) {
+      String message = 'Could not update profile.';
+
+      if (decoded is Map<String, dynamic>) {
+        final detail = decoded['detail'];
+
+        if (detail != null) {
+          message = detail.toString();
+        }
+      }
+
+      throw Exception(message);
+    }
 
     if (decoded is! Map<String, dynamic>) {
       throw Exception(
-        'Invalid house detail response.',
+        'Invalid account profile update response.',
       );
     }
 
-    return HouseDetailModel.fromJson(decoded);
+    return AccountProfileUpdateModel.fromJson(
+      decoded,
+    );
   }
 }

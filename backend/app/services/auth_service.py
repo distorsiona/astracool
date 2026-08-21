@@ -297,7 +297,13 @@ class AuthService:
                     {
                         "email": email,
                         "password": data.password,
+                        # sacred permite usar la cuenta sin verificar
+                        # el correo. por eso supabase auth se confirma
+                        # internamente para no bloquear el login.
+                        # la verificación real de sacred vive en:
+                        # profiles.email_verified
                         "email_confirm": True,
+
                         "user_metadata": {
                             "display_name":
                                 full_name,
@@ -359,6 +365,21 @@ class AuthService:
 
             "username":
                 username,
+
+            # copia sincronizada del correo.
+            # supabase auth sigue siendo la fuente principal,
+            # pero sacred guarda el correo también en profiles
+            # para verificación y recuperación de contraseña.
+            "email":
+                email,
+
+            # la verificación de sacred es opcional e independiente
+            # de la confirmación interna de supabase auth.
+            "email_verified":
+                False,
+
+            "email_verified_at":
+                None,
 
             "birth_date":
                 data.birth_date.isoformat(),
@@ -933,7 +954,10 @@ class AuthService:
             .select(
                 "id,"
                 "display_name,"
-                "username"
+                "username,"
+                "email,"
+                "email_verified,"
+                "email_verified_at"
             )
             .eq(
                 "id",
@@ -985,7 +1009,19 @@ class AuthService:
                     user_id,
 
                 "email":
-                    user.email,
+                    (
+                        user.email
+                        or profile.get(
+                            "email"
+                        )
+                    ),
+
+                "email_verified":
+                    bool(
+                        profile.get(
+                            "email_verified"
+                        )
+                    ),
 
                 "username":
                     profile.get(

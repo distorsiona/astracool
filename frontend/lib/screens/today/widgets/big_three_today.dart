@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/today_model.dart';
 import '../../../theme/card_decorations.dart';
 import 'today_title_line.dart';
@@ -16,6 +18,8 @@ class BigThreeToday extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       decoration: cardDecoration(),
@@ -23,14 +27,14 @@ class BigThreeToday extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            TodayTitleLine(title: 'YOUR BIG THREE', accentColor: accentColor),
+            TodayTitleLine(title: l10n.bigThreeTitle, accentColor: accentColor),
             const SizedBox(height: 24),
             Row(
               children: [
                 Expanded(
                   child: BigItem(
                     symbol: '☉',
-                    label: 'SUN',
+                    label: l10n.sunLabel,
                     value: data.sun,
                     accentColor: accentColor,
                   ),
@@ -39,7 +43,7 @@ class BigThreeToday extends StatelessWidget {
                 Expanded(
                   child: BigItem(
                     symbol: '☾',
-                    label: 'MOON',
+                    label: l10n.moonLabel,
                     value: data.moon,
                     accentColor: accentColor,
                   ),
@@ -48,7 +52,7 @@ class BigThreeToday extends StatelessWidget {
                 Expanded(
                   child: BigItem(
                     symbol: '↑',
-                    label: 'RISING',
+                    label: l10n.risingLabel,
                     value: data.rising,
                     accentColor: accentColor,
                   ),
@@ -97,7 +101,7 @@ class BigItem extends StatelessWidget {
         ),
         const SizedBox(height: 9),
         Text(
-          value.toUpperCase(),
+          localizedSignName(context, value).toUpperCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(

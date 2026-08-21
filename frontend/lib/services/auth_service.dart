@@ -1,8 +1,30 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+enum AuthErrorCode {
+  network,
+  timeout,
+  invalidResponse,
+  requestFailed,
+}
+
+class AuthException implements Exception {
+  final AuthErrorCode code;
+  final String? backendDetail;
+
+  const AuthException(
+    this.code, {
+    this.backendDetail,
+  });
+
+  @override
+  String toString() {
+    return backendDetail ?? code.name;
+  }
+}
 
 class AuthService {
   static const String baseUrl =
@@ -35,33 +57,10 @@ class AuthService {
       'birth_place': birthPlace.trim(),
     };
 
-    final response = await http.post(
-      Uri.parse(
-        '$baseUrl/register',
-      ),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: jsonEncode(
-        body,
-      ),
+    return _post(
+      '$baseUrl/register',
+      body,
     );
-
-    final decoded = _decodeResponse(
-      response,
-    );
-
-    if (response.statusCode < 200 ||
-        response.statusCode >= 300) {
-      throw AuthException(
-        _extractError(
-          decoded,
-        ),
-      );
-    }
-
-    return decoded;
   }
 
   // ============================================================
@@ -72,38 +71,89 @@ class AuthService {
     required String identifier,
     required String password,
   }) async {
-    final response = await http.post(
-      Uri.parse(
-        '$baseUrl/login',
-      ),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+    return _post(
+      '$baseUrl/login',
+      {
+        'identifier': identifier.trim(),
+        'password': password,
       },
-      body: jsonEncode(
-        {
-          'identifier': identifier.trim(),
-          'password': password,
-        },
-      ),
+    );
+  }
+
+  // ============================================================
+  // LOGOUT
+  // ============================================================
+  //
+  // Actualmente Sacred autentica contra FastAPI y este servicio
+  // NO mantiene un cliente Supabase ni una sesión persistente
+  // propia en Flutter.
+  //
+  // Por eso aquí no corresponde llamar:
+  //
+  // supabase.auth.signOut()
+  //
+  // El logout actual consiste en eliminar las pantallas privadas
+  // del Navigator desde AccountProfileScreen.
+  //
+  // Si más adelante guardamos access_token / refresh_token
+  // localmente, este método será también el lugar donde limpiarlos.
+  // ============================================================
+
+  static Future<void> logout() async {
+    return;
+  }
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+
+  static Future<Map<String, dynamic>> _post(
+    String url,
+    Map<String, dynamic> body,
+  ) async {
+    late final http.Response response;
+
+    try {
+      response = await http
+          .post(
+            Uri.parse(url),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(
+            const Duration(seconds: 30),
+          );
+    } on TimeoutException {
+      throw const AuthException(
+        AuthErrorCode.timeout,
+      );
+    } catch (_) {
+      throw const AuthException(
+        AuthErrorCode.network,
+      );
+    }
+
+    debugPrint(
+      'AUTH STATUS: ${response.statusCode}',
     );
 
     debugPrint(
-      'LOGIN STATUS: ${response.statusCode}',
-    );
-
-    debugPrint(
-      'LOGIN BODY: ${response.body}',
+      'AUTH BODY: ${response.body}',
     );
 
     final decoded = _decodeResponse(
       response,
     );
 
-    if (response.statusCode < 200 ||
+    if (
+        response.statusCode < 200 ||
         response.statusCode >= 300) {
       throw AuthException(
-        _extractError(
+        AuthErrorCode.requestFailed,
+        backendDetail: _extractError(
           decoded,
         ),
       );
@@ -112,33 +162,23 @@ class AuthService {
     return decoded;
   }
 
-  // ============================================================
-  // HELPERS
-  // ============================================================
-
   static String _formatDate(
     DateTime date,
   ) {
     final year =
-        date.year
-            .toString()
-            .padLeft(
+        date.year.toString().padLeft(
               4,
               '0',
             );
 
     final month =
-        date.month
-            .toString()
-            .padLeft(
+        date.month.toString().padLeft(
               2,
               '0',
             );
 
     final day =
-        date.day
-            .toString()
-            .padLeft(
+        date.day.toString().padLeft(
               2,
               '0',
             );
@@ -150,17 +190,13 @@ class AuthService {
     TimeOfDay time,
   ) {
     final hour =
-        time.hour
-            .toString()
-            .padLeft(
+        time.hour.toString().padLeft(
               2,
               '0',
             );
 
     final minute =
-        time.minute
-            .toString()
-            .padLeft(
+        time.minute.toString().padLeft(
               2,
               '0',
             );
@@ -180,7 +216,8 @@ class AuthService {
         response.body,
       );
 
-      if (decoded is Map<String, dynamic>) {
+      if (decoded
+          is Map<String, dynamic>) {
         return decoded;
       }
 
@@ -188,53 +225,47 @@ class AuthService {
         'data': decoded,
       };
     } catch (_) {
-      throw AuthException(
-        'El servidor devolvió una respuesta inválida.',
+      throw const AuthException(
+        AuthErrorCode.invalidResponse,
       );
     }
   }
 
-  static String _extractError(
+  // devuelve el detail que mandó el backend, o null si no hay
+  // ninguno usable. no se traduce: es contenido del backend.
+  static String? _extractError(
     Map<String, dynamic> response,
   ) {
-    final detail = response['detail'];
+    final detail =
+        response['detail'];
 
     if (detail is String) {
       return detail;
     }
 
     if (detail is Map) {
-      final message = detail['message'];
+      final message =
+          detail['message'];
 
       if (message != null) {
         return message.toString();
       }
     }
 
-    if (detail is List &&
+    if (
+        detail is List &&
         detail.isNotEmpty) {
-      final first = detail.first;
+      final first =
+          detail.first;
 
-      if (first is Map &&
+      if (
+          first is Map &&
           first['msg'] != null) {
-        return first['msg'].toString();
+        return first['msg']
+            .toString();
       }
     }
 
-    return 'No fue posible completar la solicitud.';
-  }
-}
-
-
-class AuthException implements Exception {
-  final String message;
-
-  AuthException(
-    this.message,
-  );
-
-  @override
-  String toString() {
-    return message;
+    return null;
   }
 }

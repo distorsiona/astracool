@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/domain_labels.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../models/zodiac_profile_model.dart';
 import '../theme/zodiac_theme.dart';
 import 'zodiac_attribute_item.dart';
@@ -31,35 +33,6 @@ class ZodiacProfileHeader extends StatelessWidget {
 
       case ZodiacElement.water:
         return Icons.water_drop_outlined;
-    }
-  }
-
-  String _getElementName() {
-    switch (profile.element) {
-      case ZodiacElement.fire:
-        return 'Fire';
-
-      case ZodiacElement.earth:
-        return 'Earth';
-
-      case ZodiacElement.air:
-        return 'Air';
-
-      case ZodiacElement.water:
-        return 'Water';
-    }
-  }
-
-  String _getModalityName() {
-    switch (profile.modality) {
-      case ZodiacModality.cardinal:
-        return 'Cardinal';
-
-      case ZodiacModality.fixed:
-        return 'Fixed';
-
-      case ZodiacModality.mutable:
-        return 'Mutable';
     }
   }
 
@@ -113,14 +86,14 @@ class ZodiacProfileHeader extends StatelessWidget {
         final width = constraints.maxWidth;
 
         if (width < 600) {
-          return _buildMobile();
+          return _buildMobile(context);
         }
 
         if (width < 1100) {
-          return _buildTablet();
+          return _buildTablet(context);
         }
 
-        return _buildDesktop();
+        return _buildDesktop(context);
       },
     );
   }
@@ -129,7 +102,7 @@ class ZodiacProfileHeader extends StatelessWidget {
   // DESKTOP
   // =========================================================
 
-  Widget _buildDesktop() {
+  Widget _buildDesktop(BuildContext context) {
     return Container(
       width: double.infinity,
       height: 440,
@@ -182,7 +155,7 @@ class ZodiacProfileHeader extends StatelessWidget {
                 // SIGNO
 
                 Text(
-                  profile.sign.toUpperCase(),
+                  localizedSignName(context, profile.sign).toUpperCase(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -202,7 +175,7 @@ class ZodiacProfileHeader extends StatelessWidget {
                 // FECHA
 
                 Text(
-                  profile.dateRange,
+                  localizedSignDateRange(context, profile.sign),
                   style: const TextStyle(
                     color: Color(
                       0xFF202020,
@@ -222,6 +195,7 @@ class ZodiacProfileHeader extends StatelessWidget {
                     left: 10,
                   ),
                   child: _buildAttributes(
+                    context,
                     iconSize: 34,
                     gap: 30,
                   ),
@@ -260,9 +234,9 @@ class ZodiacProfileHeader extends StatelessWidget {
 
   // =========================================================
   // TABLET
-    // =========================================================
+  // =========================================================
 
-      Widget _buildTablet() {
+  Widget _buildTablet(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -283,9 +257,7 @@ class ZodiacProfileHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
           ),
-
           const SizedBox(width: 22),
-
           Expanded(
             flex: 5,
             child: Column(
@@ -293,7 +265,7 @@ class ZodiacProfileHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  profile.sign.toUpperCase(),
+                  localizedSignName(context, profile.sign).toUpperCase(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -305,29 +277,24 @@ class ZodiacProfileHeader extends StatelessWidget {
                     height: 1,
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
                 Text(
-                  profile.dateRange,
+                  localizedSignDateRange(context, profile.sign),
                   style: const TextStyle(
                     color: Color(0xFF202020),
                     fontSize: 14,
                   ),
                 ),
-
                 const SizedBox(height: 30),
-
                 _buildAttributes(
+                  context,
                   iconSize: 30,
                   gap: 20,
                 ),
               ],
             ),
           ),
-
           const SizedBox(width: 18),
-
           Expanded(
             flex: 4,
             child: Center(
@@ -346,7 +313,7 @@ class ZodiacProfileHeader extends StatelessWidget {
   // MOBILE
   // =========================================================
 
-  Widget _buildMobile() {
+  Widget _buildMobile(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(
@@ -408,13 +375,11 @@ class ZodiacProfileHeader extends StatelessWidget {
                         height: 1,
                       ),
                     ),
-
                     const SizedBox(
                       height: 8,
                     ),
-
                     Text(
-                      profile.dateRange,
+                      localizedSignDateRange(context, profile.sign),
                       style: const TextStyle(
                         color: Color(
                           0xFF202020,
@@ -460,6 +425,7 @@ class ZodiacProfileHeader extends StatelessWidget {
           // =================================================
 
           _buildAttributes(
+            context,
             iconSize: 28,
             gap: 18,
           ),
@@ -472,10 +438,13 @@ class ZodiacProfileHeader extends StatelessWidget {
   // ATTRIBUTES
   // =========================================================
 
-  Widget _buildAttributes({
+  Widget _buildAttributes(
+    BuildContext context, {
     required double iconSize,
     required double gap,
   }) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -486,38 +455,34 @@ class ZodiacProfileHeader extends StatelessWidget {
             color: accentColor,
             size: iconSize,
           ),
-          title: 'Element',
-          value: _getElementName(),
+          title: l10n.elementLabel,
+          value: localizedElementName(context, profile.element),
           accentColor: accentColor,
         ),
-
         SizedBox(
           height: gap,
         ),
-
         ZodiacAttributeItem(
           icon: Icon(
             Icons.circle_outlined,
             color: accentColor,
             size: iconSize,
           ),
-          title: 'Ruling Planet',
-          value: profile.rulingPlanet,
+          title: l10n.rulingPlanetLabel,
+          value: localizedPlanetName(context, profile.rulingPlanet),
           accentColor: accentColor,
         ),
-
         SizedBox(
           height: gap,
         ),
-
         ZodiacAttributeItem(
           icon: Icon(
             Icons.crop_square,
             color: accentColor,
             size: iconSize,
           ),
-          title: 'Modality',
-          value: _getModalityName(),
+          title: l10n.modalityLabel,
+          value: localizedModalityName(context, profile.modality),
           accentColor: accentColor,
         ),
       ],

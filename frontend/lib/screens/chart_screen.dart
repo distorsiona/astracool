@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/error_messages.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../l10n/locale_controller.dart';
 import '../models/natal_chart_model.dart';
 import '../services/api_service.dart';
 import '../theme/zodiac_theme.dart';
 import '../widgets/astrology_top_navigation.dart';
 
+import 'account_profile_screen.dart';
 import 'allhouses_screen.dart';
 import 'housedetail_screen.dart';
 import 'profile_screen.dart';
@@ -34,27 +38,53 @@ class _ChartScreenState extends State<ChartScreen> {
   NatalChartModel? natalChart;
 
   bool loading = true;
-  String? errorMessage;
+  Object? loadError;
+
+  // se usan para volver a pedir la carta cuando el usuario
+  // cambia de idioma en tiempo de ejecución (EN <-> ES).
+  bool _initialized = false;
+  String? _lastLanguage;
 
   @override
   void initState() {
     super.initState();
-    _loadChart();
+    // la carga inicial se dispara desde didChangeDependencies,
+    // porque ahí sí es seguro leer LocaleScope.of(context).
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final currentLanguage = LocaleScope.of(context).value.languageCode;
+
+    if (!_initialized) {
+      _initialized = true;
+      _lastLanguage = currentLanguage;
+      _loadChart();
+      return;
+    }
+
+    if (_lastLanguage != currentLanguage) {
+      _lastLanguage = currentLanguage;
+      _loadChart();
+    }
   }
 
   // ============================================================
-  // CARGAR CARTA NATAL
+  // API
   // ============================================================
 
   Future<void> _loadChart() async {
     setState(() {
       loading = true;
-      errorMessage = null;
+      loadError = null;
     });
 
     try {
       final result = await ApiService.getChart(
         userId: widget.userId,
+        language: LocaleScope.of(context).value.languageCode,
       );
 
       if (!mounted) {
@@ -72,9 +102,49 @@ class _ChartScreenState extends State<ChartScreen> {
 
       setState(() {
         loading = false;
-        errorMessage = error.toString();
+        loadError = error;
       });
     }
+  }
+
+  // ============================================================
+  // NAVIGATION
+  // ============================================================
+
+  void _goToToday() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TodayScreen(
+          userId: widget.userId,
+        ),
+      ),
+    );
+  }
+
+  void _goToProfile() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ProfileScreen(
+          userId: widget.userId,
+        ),
+      ),
+    );
+  }
+
+  void _goToAccountProfile() {
+    final data = natalChart;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AccountProfileScreen(
+          userId: widget.userId,
+          zodiacSign: data?.profile.sign,
+        ),
+      ),
+    );
   }
 
   // ============================================================
@@ -101,10 +171,11 @@ class _ChartScreenState extends State<ChartScreen> {
   // ============================================================
   // ABRIR TODAS LAS CASAS
   //
-  // AllHousesScreen ahora obtiene directamente sus casas usando
+  // AllHousesScreen obtiene directamente sus casas usando:
+  //
   // GET /api/houses/{userId}
   //
-  // Por eso ya NO recibe data.chart.houses.
+  // por eso ya no recibe data.chart.houses.
   // ============================================================
 
   void _openAllHouses(
@@ -132,7 +203,7 @@ class _ChartScreenState extends State<ChartScreen> {
       return _buildLoading();
     }
 
-    if (errorMessage != null) {
+    if (loadError != null) {
       return _buildError();
     }
 
@@ -140,8 +211,7 @@ class _ChartScreenState extends State<ChartScreen> {
 
     if (data == null) {
       return _buildError(
-        customMessage:
-            'No fue posible cargar tu carta natal.',
+        customMessage: AppLocalizations.of(context)!.chartLoadError,
       );
     }
 
@@ -155,31 +225,23 @@ class _ChartScreenState extends State<ChartScreen> {
         child: Column(
           children: [
             AstrologyTopNavigation(
-              activeSection:
-                  AstrologySection.chart,
+              activeSection: AstrologySection.chart,
               accentColor: accentColor,
-              onToday: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => TodayScreen(
-                      userId: widget.userId,
-                    ),
-                  ),
-                );
-              },
+
+              // today
+              onToday: _goToToday,
+
+              // ya estamos en chart
               onChart: () {},
+
+              // week todavía pendiente
               onWeek: () {},
-              onProfile: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ProfileScreen(
-                      userId: widget.userId,
-                    ),
-                  ),
-                );
-              },
+
+              // me
+              onProfile: _goToProfile,
+
+              // account settings
+              onAccountProfile: _goToAccountProfile,
             ),
             Expanded(
               child: LayoutBuilder(
@@ -187,31 +249,22 @@ class _ChartScreenState extends State<ChartScreen> {
                   context,
                   constraints,
                 ) {
-                  final width =
-                      constraints.maxWidth;
+                  final width = constraints.maxWidth;
 
-                  final isMobile =
-                      width < 650;
+                  final isMobile = width < 650;
 
-                  final isTablet =
-                      width >= 650 &&
-                      width < 1100;
+                  final isTablet = width >= 650 && width < 1100;
 
-                  final horizontalPadding =
-                      isMobile
-                          ? 14.0
-                          : isTablet
-                              ? 28.0
-                              : 46.0;
+                  final horizontalPadding = isMobile
+                      ? 14.0
+                      : isTablet
+                          ? 28.0
+                          : 46.0;
 
-                  final verticalPadding =
-                      isMobile
-                          ? 18.0
-                          : 28.0;
+                  final verticalPadding = isMobile ? 18.0 : 28.0;
 
                   return SingleChildScrollView(
-                    physics:
-                        const BouncingScrollPhysics(),
+                    physics: const BouncingScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(
                       horizontalPadding,
                       verticalPadding,
@@ -220,8 +273,7 @@ class _ChartScreenState extends State<ChartScreen> {
                     ),
                     child: Center(
                       child: ConstrainedBox(
-                        constraints:
-                            const BoxConstraints(
+                        constraints: const BoxConstraints(
                           maxWidth: 1540,
                         ),
                         child: isMobile
@@ -259,38 +311,30 @@ class _ChartScreenState extends State<ChartScreen> {
     Color accentColor,
   ) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               flex: 66,
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ChartWheelCard(
                     data: data,
                     accentColor: accentColor,
-                    layout:
-                        ChartLayout.desktop,
+                    layout: ChartLayout.desktop,
                   ),
                   const SizedBox(height: 24),
                   FeaturedHousesSection(
-                    houses:
-                        data.chart.featuredHouses,
-                    accentColor:
-                        accentColor,
-                    layout:
-                        ChartLayout.desktop,
-                    onViewAll: () =>
-                        _openAllHouses(data),
-                    onHouseTap:
-                        (houseNumber) =>
-                            _openHouse(
+                    houses: data.chart.featuredHouses,
+                    accentColor: accentColor,
+                    layout: ChartLayout.desktop,
+                    onViewAll: () => _openAllHouses(
+                      data,
+                    ),
+                    onHouseTap: (houseNumber) => _openHouse(
                       data,
                       houseNumber,
                     ),
@@ -302,25 +346,18 @@ class _ChartScreenState extends State<ChartScreen> {
             Expanded(
               flex: 34,
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   BigThreePanel(
-                    bigThree:
-                        data.chart.bigThree,
-                    accentColor:
-                        accentColor,
-                    layout:
-                        ChartLayout.desktop,
+                    bigThree: data.chart.bigThree,
+                    accentColor: accentColor,
+                    layout: ChartLayout.desktop,
                   ),
                   const SizedBox(height: 20),
                   SignDetailsPanel(
-                    profile:
-                        data.profile,
-                    accentColor:
-                        accentColor,
-                    layout:
-                        ChartLayout.desktop,
+                    profile: data.profile,
+                    accentColor: accentColor,
+                    layout: ChartLayout.desktop,
                   ),
                 ],
               ),
@@ -352,8 +389,7 @@ class _ChartScreenState extends State<ChartScreen> {
     Color accentColor,
   ) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ChartWheelCard(
           data: data,
@@ -362,45 +398,34 @@ class _ChartScreenState extends State<ChartScreen> {
         ),
         const SizedBox(height: 20),
         Row(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: BigThreePanel(
-                bigThree:
-                    data.chart.bigThree,
-                accentColor:
-                    accentColor,
-                layout:
-                    ChartLayout.tablet,
+                bigThree: data.chart.bigThree,
+                accentColor: accentColor,
+                layout: ChartLayout.tablet,
               ),
             ),
             const SizedBox(width: 18),
             Expanded(
               child: SignDetailsPanel(
-                profile:
-                    data.profile,
-                accentColor:
-                    accentColor,
-                layout:
-                    ChartLayout.tablet,
+                profile: data.profile,
+                accentColor: accentColor,
+                layout: ChartLayout.tablet,
               ),
             ),
           ],
         ),
         const SizedBox(height: 24),
         FeaturedHousesSection(
-          houses:
-              data.chart.featuredHouses,
-          accentColor:
-              accentColor,
-          layout:
-              ChartLayout.tablet,
-          onViewAll: () =>
-              _openAllHouses(data),
-          onHouseTap:
-              (houseNumber) =>
-                  _openHouse(
+          houses: data.chart.featuredHouses,
+          accentColor: accentColor,
+          layout: ChartLayout.tablet,
+          onViewAll: () => _openAllHouses(
+            data,
+          ),
+          onHouseTap: (houseNumber) => _openHouse(
             data,
             houseNumber,
           ),
@@ -430,8 +455,7 @@ class _ChartScreenState extends State<ChartScreen> {
     Color accentColor,
   ) {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ChartWheelCard(
           data: data,
@@ -440,35 +464,25 @@ class _ChartScreenState extends State<ChartScreen> {
         ),
         const SizedBox(height: 16),
         BigThreePanel(
-          bigThree:
-              data.chart.bigThree,
-          accentColor:
-              accentColor,
-          layout:
-              ChartLayout.mobile,
+          bigThree: data.chart.bigThree,
+          accentColor: accentColor,
+          layout: ChartLayout.mobile,
         ),
         const SizedBox(height: 16),
         SignDetailsPanel(
-          profile:
-              data.profile,
-          accentColor:
-              accentColor,
-          layout:
-              ChartLayout.mobile,
+          profile: data.profile,
+          accentColor: accentColor,
+          layout: ChartLayout.mobile,
         ),
         const SizedBox(height: 20),
         FeaturedHousesSection(
-          houses:
-              data.chart.featuredHouses,
-          accentColor:
-              accentColor,
-          layout:
-              ChartLayout.mobile,
-          onViewAll: () =>
-              _openAllHouses(data),
-          onHouseTap:
-              (houseNumber) =>
-                  _openHouse(
+          houses: data.chart.featuredHouses,
+          accentColor: accentColor,
+          layout: ChartLayout.mobile,
+          onViewAll: () => _openAllHouses(
+            data,
+          ),
+          onHouseTap: (houseNumber) => _openHouse(
             data,
             houseNumber,
           ),
@@ -495,11 +509,9 @@ class _ChartScreenState extends State<ChartScreen> {
 
   Widget _buildLoading() {
     return const Scaffold(
-      backgroundColor:
-          Color(0xFFF4F1EE),
+      backgroundColor: Color(0xFFF4F1EE),
       body: Center(
-        child:
-            CircularProgressIndicator(),
+        child: CircularProgressIndicator(),
       ),
     );
   }
@@ -511,16 +523,15 @@ class _ChartScreenState extends State<ChartScreen> {
   Widget _buildError({
     String? customMessage,
   }) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      backgroundColor:
-          const Color(0xFFF4F1EE),
+      backgroundColor: const Color(0xFFF4F1EE),
       body: Center(
         child: Padding(
-          padding:
-              const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisSize:
-                MainAxisSize.min,
+            mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
                 Icons.error_outline,
@@ -529,18 +540,19 @@ class _ChartScreenState extends State<ChartScreen> {
               const SizedBox(height: 16),
               Text(
                 customMessage ??
-                    errorMessage ??
-                    'Error desconocido.',
-                textAlign:
-                    TextAlign.center,
+                    (loadError != null
+                        ? describeError(
+                            context,
+                            loadError!,
+                          )
+                        : l10n.chartLoadError),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
               FilledButton(
-                onPressed:
-                    _loadChart,
-                child:
-                    const Text(
-                  'Reintentar',
+                onPressed: _loadChart,
+                child: Text(
+                  l10n.retry,
                 ),
               ),
             ],

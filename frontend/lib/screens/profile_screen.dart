@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/error_messages.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../models/zodiac_profile_model.dart';
 import '../services/api_service.dart';
 import '../theme/zodiac_theme.dart';
@@ -9,9 +11,12 @@ import '../widgets/zodiac_profile_header.dart';
 
 import 'chart_screen.dart';
 import 'today_screen.dart';
+import 'account_profile_screen.dart';
 
 import 'profile/widgets/profile_feature_card.dart';
 import 'profile/widgets/your_chart_card.dart';
+
+
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
@@ -26,7 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ZodiacProfileModel? profile;
 
   bool loading = true;
-  String? errorMessage;
+  Object? loadError;
 
   @override
   void initState() {
@@ -42,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadProfile() async {
     setState(() {
       loading = true;
-      errorMessage = null;
+      loadError = null;
     });
 
     try {
@@ -63,7 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       setState(() {
         loading = false;
-        errorMessage = error.toString();
+        loadError = error;
       });
     }
   }
@@ -90,6 +95,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _goToAccountProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AccountProfileScreen(
+          userId: widget.userId,
+          zodiacSign: profile!.sign,
+        ),
+      ),
+    );
+  }
+
+
   // ============================================================
   // BUILD
   // ============================================================
@@ -100,12 +118,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return _buildLoading();
     }
 
-    if (errorMessage != null) {
+    if (loadError != null) {
       return _buildError();
     }
 
     if (profile == null) {
-      return _buildError(customMessage: 'No fue posible cargar el perfil.');
+      return _buildError(
+        customMessage: AppLocalizations.of(context)!.profileLoadError,
+      );
     }
 
     final currentProfile = profile!;
@@ -124,6 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onChart: _goToChart,
               onWeek: () {},
               onProfile: () {},
+              onAccountProfile: _goToAccountProfile,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -175,6 +196,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ============================================================
 
   Widget _buildDesktop(ZodiacProfileModel profile, Color accentColor) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -208,10 +231,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Expanded(
               child: ProfileFeatureCard(
-                title: 'TODAY',
-                description:
-                    'See how today’s transits are influencing your chart.',
-                actionText: 'VIEW TODAY',
+                title: l10n.featureTodayTitle,
+                description: l10n.featureTodayDescription,
+                actionText: l10n.featureTodayAction,
                 icon: Icons.wb_sunny_outlined,
                 accentColor: accentColor,
                 type: FeatureType.today,
@@ -221,9 +243,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 18),
             Expanded(
               child: ProfileFeatureCard(
-                title: 'ACTIVE TRANSITS',
-                description: 'The most important transits happening right now.',
-                actionText: 'VIEW TRANSITS',
+                title: l10n.featureTransitsTitle,
+                description: l10n.featureTransitsDescription,
+                actionText: l10n.featureTransitsAction,
                 icon: Icons.public_outlined,
                 accentColor: accentColor,
                 type: FeatureType.transits,
@@ -233,9 +255,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 18),
             Expanded(
               child: ProfileFeatureCard(
-                title: 'THIS WEEK',
-                description: 'Your astrological forecast for the week ahead.',
-                actionText: 'VIEW WEEK',
+                title: l10n.featureWeekTitle,
+                description: l10n.featureWeekDescription,
+                actionText: l10n.featureWeekAction,
                 icon: Icons.calendar_month_outlined,
                 accentColor: accentColor,
                 type: FeatureType.week,
@@ -256,6 +278,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ============================================================
 
   Widget _buildTablet(ZodiacProfileModel profile, Color accentColor) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       children: [
         ZodiacProfileHeader(profile: profile, accentColor: accentColor),
@@ -272,10 +296,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Expanded(
               child: ProfileFeatureCard(
-                title: 'TODAY',
-                description:
-                    'See how today’s transits are influencing your chart.',
-                actionText: 'VIEW TODAY',
+                title: l10n.featureTodayTitle,
+                description: l10n.featureTodayDescription,
+                actionText: l10n.featureTodayAction,
                 icon: Icons.wb_sunny_outlined,
                 accentColor: accentColor,
                 type: FeatureType.today,
@@ -285,9 +308,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: ProfileFeatureCard(
-                title: 'ACTIVE TRANSITS',
-                description: 'The most important transits happening right now.',
-                actionText: 'VIEW TRANSITS',
+                title: l10n.featureTransitsTitle,
+                description: l10n.featureTransitsDescription,
+                actionText: l10n.featureTransitsAction,
                 icon: Icons.public_outlined,
                 accentColor: accentColor,
                 type: FeatureType.transits,
@@ -299,9 +322,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 16),
         // WEEK
         ProfileFeatureCard(
-          title: 'THIS WEEK',
-          description: 'Your astrological forecast for the week ahead.',
-          actionText: 'VIEW WEEK',
+          title: l10n.featureWeekTitle,
+          description: l10n.featureWeekDescription,
+          actionText: l10n.featureWeekAction,
           icon: Icons.calendar_month_outlined,
           accentColor: accentColor,
           type: FeatureType.week,
@@ -319,6 +342,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ============================================================
 
   Widget _buildMobile(ZodiacProfileModel profile, Color accentColor) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       children: [
         ZodiacProfileHeader(profile: profile, accentColor: accentColor),
@@ -332,9 +357,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 16),
         // TODAY
         ProfileFeatureCard(
-          title: 'TODAY',
-          description: 'See how today’s transits are influencing your chart.',
-          actionText: 'VIEW TODAY',
+          title: l10n.featureTodayTitle,
+          description: l10n.featureTodayDescription,
+          actionText: l10n.featureTodayAction,
           icon: Icons.wb_sunny_outlined,
           accentColor: accentColor,
           type: FeatureType.today,
@@ -344,9 +369,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 14),
         // TRANSITS
         ProfileFeatureCard(
-          title: 'ACTIVE TRANSITS',
-          description: 'The most important transits happening right now.',
-          actionText: 'VIEW TRANSITS',
+          title: l10n.featureTransitsTitle,
+          description: l10n.featureTransitsDescription,
+          actionText: l10n.featureTransitsAction,
           icon: Icons.public_outlined,
           accentColor: accentColor,
           type: FeatureType.transits,
@@ -356,9 +381,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 14),
         // WEEK
         ProfileFeatureCard(
-          title: 'THIS WEEK',
-          description: 'Your astrological forecast for the week ahead.',
-          actionText: 'VIEW WEEK',
+          title: l10n.featureWeekTitle,
+          description: l10n.featureWeekDescription,
+          actionText: l10n.featureWeekAction,
           icon: Icons.calendar_month_outlined,
           accentColor: accentColor,
           type: FeatureType.week,
@@ -389,6 +414,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ============================================================
 
   Widget _buildError({String? customMessage}) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: ZodiacTheme.background,
       body: Center(
@@ -400,13 +427,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const Icon(Icons.error_outline, size: 46),
               const SizedBox(height: 16),
               Text(
-                customMessage ?? errorMessage ?? 'Error desconocido.',
+                customMessage ??
+                    (loadError != null
+                        ? describeError(context, loadError!)
+                        : l10n.profileLoadError),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
               FilledButton(
                 onPressed: _loadProfile,
-                child: const Text('Reintentar'),
+                child: Text(l10n.retry),
               ),
             ],
           ),

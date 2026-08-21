@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
+
 class SacredDetailTopBar extends StatelessWidget {
   final Color accentColor;
   final String trailingLabel;
@@ -32,7 +34,7 @@ class SacredDetailTopBar extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: onBack,
-                tooltip: 'Back',
+                tooltip: AppLocalizations.of(context)!.backTooltip,
                 icon: const Icon(Icons.arrow_back),
               ),
               SizedBox(width: narrow ? 2 : 6),

@@ -23,10 +23,8 @@ class HousePlanetModel {
       symbol: json['symbol'] as String? ?? '•',
       sign: json['sign'] as String?,
       degree: (json['degree'] as num?)?.toDouble(),
-      formattedDegree:
-          json['formatted_degree'] as String?,
-      isRetrograde:
-          json['is_retrograde'] as bool? ?? false,
+      formattedDegree: json['formatted_degree'] as String?,
+      isRetrograde: json['is_retrograde'] as bool? ?? false,
     );
   }
 }
@@ -82,11 +80,9 @@ class HouseModel {
   });
 
   factory HouseModel.fromJson(Map<String, dynamic> json) {
-    final planetsJson =
-        json['planets'] as List<dynamic>? ?? const [];
+    final planetsJson = json['planets'] as List<dynamic>? ?? const [];
 
-    final keywordsJson =
-        json['keywords'] as List<dynamic>? ?? const [];
+    final keywordsJson = json['keywords'] as List<dynamic>? ?? const [];
 
     return HouseModel(
       house: json['house'] as int? ?? 0,
@@ -95,8 +91,7 @@ class HouseModel {
       subtitle: json['subtitle'] as String? ?? '',
       sign: json['sign'] as String? ?? '',
       degree: (json['degree'] as num?)?.toDouble() ?? 0.0,
-      formattedDegree:
-          json['formatted_degree'] as String? ?? '',
+      formattedDegree: json['formatted_degree'] as String? ?? '',
       ruler: json['ruler'] as String? ?? '',
       planets: planetsJson
           .map(
@@ -105,12 +100,9 @@ class HouseModel {
             ),
           )
           .toList(),
-      keywords: keywordsJson
-          .map((item) => item.toString())
-          .toList(),
+      keywords: keywordsJson.map((item) => item.toString()).toList(),
       activity: HouseActivityModel.fromJson(
-        json['activity'] as Map<String, dynamic>? ??
-            const {},
+        json['activity'] as Map<String, dynamic>? ?? const {},
       ),
     );
   }
@@ -128,8 +120,7 @@ class HousesResponseModel {
   factory HousesResponseModel.fromJson(
     Map<String, dynamic> json,
   ) {
-    final housesJson =
-        json['houses'] as List<dynamic>? ?? const [];
+    final housesJson = json['houses'] as List<dynamic>? ?? const [];
 
     return HousesResponseModel(
       userId: json['user_id'] as String? ?? '',

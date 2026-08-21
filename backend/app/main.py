@@ -11,6 +11,10 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.chart import router as chart_router
 from app.api.routes.today import router as today_router
 from app.api.routes.houses import router as houses_router
+from app.api.routes.locale import router as locale_router
+from app.api.routes.account_profile import (
+    router as account_profile_router,
+)
 
 
 app = FastAPI(
@@ -74,6 +78,16 @@ app.include_router(
 
 app.include_router(
     houses_router,
+    prefix="/api",
+)
+
+app.include_router(
+    locale_router,
+    prefix="/api",
+)
+
+app.include_router(
+    account_profile_router,
     prefix="/api",
 )
 

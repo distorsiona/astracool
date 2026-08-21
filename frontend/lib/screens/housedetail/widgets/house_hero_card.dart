@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/house_model.dart';
 import '../../../theme/card_decorations.dart';
 import '../../../utils/astrology_symbols.dart';
@@ -24,6 +26,8 @@ class HouseHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(
@@ -63,7 +67,8 @@ class HouseHeroCard extends StatelessWidget {
               if (house.activity.level.trim().isNotEmpty)
                 Flexible(
                   child: StrengthBadge(
-                    label: house.activity.level,
+                    label:
+                        localizedActivityLevel(context, house.activity.level),
                     accentColor: accentColor,
                   ),
                 ),
@@ -80,8 +85,12 @@ class HouseHeroCard extends StatelessWidget {
 
           Text(
             house.title.trim().isEmpty
-                ? 'HOUSE ${house.house}'
-                : house.title.toUpperCase(),
+                ? l10n.houseFallbackTitle(house.house)
+                : localizeHouseTitle(
+                    context,
+                    house.house,
+                    house.title,
+                  ).toUpperCase(),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -100,7 +109,11 @@ class HouseHeroCard extends StatelessWidget {
           if (house.subtitle.trim().isNotEmpty) ...[
             const SizedBox(height: 7),
             Text(
-              house.subtitle,
+              localizeHouseSubtitle(
+                context,
+                house.house,
+                house.subtitle,
+              ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -137,16 +150,14 @@ class HouseHeroCard extends StatelessWidget {
                 Text(
                   house.sign.trim().isEmpty
                       ? '—'
-                      : house.sign.toUpperCase(),
+                      : localizedSignName(context, house.sign).toUpperCase(),
                   style: TextStyle(
                     color: const Color(0xFF231729),
                     fontSize: isMobile ? 15 : 17,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 4),
-
                 Text(
                   house.formattedDegree,
                   style: const TextStyle(
@@ -154,9 +165,7 @@ class HouseHeroCard extends StatelessWidget {
                     fontSize: 12,
                   ),
                 ),
-
                 const SizedBox(height: 13),
-
                 Row(
                   children: [
                     Text(
@@ -168,14 +177,14 @@ class HouseHeroCard extends StatelessWidget {
                         fontSize: 19,
                       ),
                     ),
-
                     const SizedBox(width: 8),
-
                     Expanded(
                       child: Text(
                         house.ruler.trim().isEmpty
-                            ? 'Ruler · —'
-                            : 'Ruler · ${house.ruler}',
+                            ? l10n.rulerUnknown
+                            : l10n.rulerWithName(
+                                localizedPlanetName(context, house.ruler),
+                              ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -196,7 +205,6 @@ class HouseHeroCard extends StatelessWidget {
 
           if (house.keywords.isNotEmpty) ...[
             const SizedBox(height: 24),
-
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -208,15 +216,13 @@ class HouseHeroCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: accentColor.withAlpha(14),
-                    borderRadius:
-                        BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color:
-                          accentColor.withAlpha(35),
+                      color: accentColor.withAlpha(35),
                     ),
                   ),
                   child: Text(
-                    keyword,
+                    localizeHouseKeyword(context, keyword),
                     style: TextStyle(
                       color: accentColor,
                       fontSize: 10,
@@ -252,8 +258,7 @@ class StrengthBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: accentColor.withAlpha(18),
-        borderRadius:
-            BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(30),
       ),
       child: Text(
         label,

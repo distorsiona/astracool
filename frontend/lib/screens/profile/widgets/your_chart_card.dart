@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../helpers/profile_card_decoration.dart';
 import 'mini_chart.dart';
 
@@ -30,13 +31,15 @@ class YourChartCard extends StatelessWidget {
             vertical: mobile ? 22 : 28,
           ),
           decoration: profileCardDecoration(),
-          child: mobile ? _buildMobile() : _buildDesktop(),
+          child: mobile ? _buildMobile(context) : _buildDesktop(context),
         ),
       ),
     );
   }
 
-  Widget _buildDesktop() {
+  Widget _buildDesktop(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       children: [
         MiniChart(color: accentColor, size: 130),
@@ -46,7 +49,7 @@ class YourChartCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'YOUR CHART',
+                l10n.yourChartTitle,
                 style: TextStyle(
                   color: accentColor,
                   fontSize: 19,
@@ -54,10 +57,9 @@ class YourChartCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Explore your natal chart, planets, houses and aspects in '
-                'detail.',
-                style: TextStyle(color: Color(0xFF252525), fontSize: 15),
+              Text(
+                l10n.yourChartDescription,
+                style: const TextStyle(color: Color(0xFF252525), fontSize: 15),
               ),
               const SizedBox(height: 24),
               ChartButton(accentColor: accentColor),
@@ -69,7 +71,9 @@ class YourChartCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMobile() {
+  Widget _buildMobile(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -78,7 +82,7 @@ class YourChartCard extends StatelessWidget {
             MiniChart(color: accentColor, size: 74),
             const SizedBox(width: 18),
             Text(
-              'YOUR CHART',
+              l10n.yourChartTitle,
               style: TextStyle(
                 color: accentColor,
                 fontSize: 15,
@@ -88,9 +92,9 @@ class YourChartCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 18),
-        const Text(
-          'Explore your natal chart, planets, houses and aspects in detail.',
-          style: TextStyle(
+        Text(
+          l10n.yourChartDescription,
+          style: const TextStyle(
             color: Color(0xFF252525),
             fontSize: 13,
             height: 1.5,
@@ -114,7 +118,7 @@ class ChartButton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'VIEW FULL CHART',
+          AppLocalizations.of(context)!.viewFullChartAction,
           style: TextStyle(
             color: accentColor,
             fontSize: 14,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/house_model.dart';
 
 import '../helpers/house_meanings.dart';
@@ -18,10 +19,11 @@ class HouseMeaningSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SectionCard(
-      title: 'WHAT THIS HOUSE RULES',
+      title: AppLocalizations.of(context)!.whatThisHouseRulesTitle,
       accentColor: accentColor,
       child: Text(
         defaultHouseMeaning(
+          context,
           house.house,
         ),
         style: const TextStyle(

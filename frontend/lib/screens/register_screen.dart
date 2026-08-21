@@ -6,6 +6,8 @@ import 'package:frontend/services/auth_service.dart';
 import 'register/helpers/register_date_format.dart';
 import 'register/widgets/register_hero.dart';
 
+import '../l10n/error_messages.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../theme/auth_colors.dart';
 import '../theme/auth_input_decoration.dart';
 import '../widgets/auth_top_logo.dart';
@@ -54,10 +56,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             final width = constraints.maxWidth;
 
             if (width < 650) {
-              return _buildMobile();
+              return _buildMobile(context);
             }
 
-            return _buildDesktop();
+            return _buildDesktop(context);
           },
         ),
       ),
@@ -68,7 +70,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // DESKTOP / TABLET
   // ============================================================
 
-  Widget _buildDesktop() {
+  Widget _buildDesktop(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
       child: Column(
@@ -105,7 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         flex: 54,
                         child: SingleChildScrollView(
                           padding: EdgeInsets.zero,
-                          child: _buildForm(mobile: false),
+                          child: _buildForm(context, mobile: false),
                         ),
                       ),
                     ],
@@ -124,7 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // MOBILE
   // ============================================================
 
-  Widget _buildMobile() {
+  Widget _buildMobile(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
       child: Column(
@@ -145,7 +147,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               children: [
                 const RegisterHero(mobile: true),
-                _buildForm(mobile: true),
+                _buildForm(context, mobile: true),
               ],
             ),
           ),
@@ -158,7 +160,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // FORMULARIO
   // ============================================================
 
-  Widget _buildForm({required bool mobile}) {
+  Widget _buildForm(BuildContext context, {required bool mobile}) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: mobile ? 24 : 50,
@@ -170,7 +174,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Crear Cuenta',
+              l10n.registerCreateAccountTitle,
               style: TextStyle(
                 color: const Color(0xFF271E28),
                 fontFamily: 'serif',
@@ -179,53 +183,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
             const SizedBox(height: 7),
-            const Text(
-              'Ingresa tus datos exactos de nacimiento para una carta '
-              'astral precisa.',
-              style: TextStyle(color: Color(0xFF675F67), fontSize: 12),
+            Text(
+              l10n.registerSubtitle,
+              style: const TextStyle(color: Color(0xFF675F67), fontSize: 12),
             ),
             SizedBox(height: mobile ? 30 : 34),
             if (mobile)
               Column(
                 children: [
-                  _buildFullNameField(),
+                  _buildFullNameField(context),
                   const SizedBox(height: 18),
-                  _buildUsernameField(),
+                  _buildUsernameField(context),
                 ],
               )
             else
               Row(
                 children: [
-                  Expanded(child: _buildFullNameField()),
+                  Expanded(child: _buildFullNameField(context)),
                   const SizedBox(width: 18),
-                  Expanded(child: _buildUsernameField()),
+                  Expanded(child: _buildUsernameField(context)),
                 ],
               ),
             const SizedBox(height: 18),
-            _buildEmailField(),
+            _buildEmailField(context),
             const SizedBox(height: 18),
-            _buildPasswordField(),
+            _buildPasswordField(context),
             const SizedBox(height: 24),
             Divider(color: authPurple.withAlpha(25), height: 1),
             const SizedBox(height: 22),
             if (mobile)
               Column(
                 children: [
-                  _buildBirthDateField(),
+                  _buildBirthDateField(context),
                   const SizedBox(height: 18),
-                  _buildBirthTimeField(),
+                  _buildBirthTimeField(context),
                 ],
               )
             else
               Row(
                 children: [
-                  Expanded(child: _buildBirthDateField()),
+                  Expanded(child: _buildBirthDateField(context)),
                   const SizedBox(width: 18),
-                  Expanded(child: _buildBirthTimeField()),
+                  Expanded(child: _buildBirthTimeField(context)),
                 ],
               ),
             const SizedBox(height: 18),
-            _buildBirthPlaceField(),
+            _buildBirthPlaceField(context),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
@@ -248,18 +251,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : const Row(
+                    : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Comenzar Viaje',
-                            style: TextStyle(
+                            l10n.registerButton,
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          SizedBox(width: 10),
-                          Icon(Icons.arrow_forward, size: 18),
+                          const SizedBox(width: 10),
+                          const Icon(Icons.arrow_forward, size: 18),
                         ],
                       ),
               ),
@@ -268,10 +271,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Flexible(
+                Flexible(
                   child: Text(
-                    '¿Ya tienes una cuenta?',
-                    style: TextStyle(color: Color(0xFF675F67), fontSize: 12),
+                    l10n.alreadyHaveAccountPrompt,
+                    style:
+                        const TextStyle(color: Color(0xFF675F67), fontSize: 12),
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -282,9 +286,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     minimumSize: Size.zero,
                     foregroundColor: authPurple,
                   ),
-                  child: const Text(
-                    'Iniciar Sesión',
-                    style: TextStyle(fontSize: 12),
+                  child: Text(
+                    l10n.loginButton,
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
               ],
@@ -299,53 +303,59 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // CAMPOS
   // ============================================================
 
-  Widget _buildFullNameField() {
+  Widget _buildFullNameField(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return FormFieldWrapper(
-      label: 'Nombre Completo',
+      label: l10n.fieldFullNameLabel,
       child: TextFormField(
         controller: _fullNameController,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
-            return 'Ingresa tu nombre';
+            return l10n.fieldFullNameError;
           }
 
           return null;
         },
         decoration: authInputDecoration(
-          hint: 'Ej. Ana García',
+          hint: l10n.fieldFullNameHint,
           icon: Icons.badge_outlined,
         ),
       ),
     );
   }
 
-  Widget _buildUsernameField() {
+  Widget _buildUsernameField(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return FormFieldWrapper(
-      label: 'Nombre de Usuario',
+      label: l10n.fieldUsernameLabel,
       child: TextFormField(
         controller: _usernameController,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
-            return 'Ingresa un usuario';
+            return l10n.fieldUsernameRequiredError;
           }
 
           if (value.trim().length < 3) {
-            return 'Mínimo 3 caracteres';
+            return l10n.fieldUsernameMinLengthError;
           }
 
           return null;
         },
         decoration: authInputDecoration(
-          hint: 'usuario',
+          hint: l10n.fieldUsernameHint,
           icon: Icons.alternate_email,
         ),
       ),
     );
   }
 
-  Widget _buildEmailField() {
+  Widget _buildEmailField(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return FormFieldWrapper(
-      label: 'Correo Electrónico',
+      label: l10n.fieldEmailLabel,
       child: TextFormField(
         controller: _emailController,
         keyboardType: TextInputType.emailAddress,
@@ -353,36 +363,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
           final email = value?.trim() ?? '';
 
           if (email.isEmpty) {
-            return 'Ingresa tu correo';
+            return l10n.fieldEmailRequiredError;
           }
 
           if (!email.contains('@') || !email.contains('.')) {
-            return 'Correo no válido';
+            return l10n.fieldEmailInvalidError;
           }
 
           return null;
         },
         decoration: authInputDecoration(
-          hint: 'tu@correo.com',
+          hint: l10n.fieldEmailHint,
           icon: Icons.mail_outline,
         ),
       ),
     );
   }
 
-  Widget _buildPasswordField() {
+  Widget _buildPasswordField(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return FormFieldWrapper(
-      label: 'Contraseña',
+      label: l10n.fieldPasswordLabel,
       child: TextFormField(
         controller: _passwordController,
         obscureText: _obscurePassword,
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Ingresa una contraseña';
+            return l10n.fieldRegisterPasswordRequiredError;
           }
 
           if (value.length < 8) {
-            return 'Debe tener al menos 8 caracteres';
+            return l10n.fieldPasswordMinLengthError;
           }
 
           return null;
@@ -409,9 +421,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildBirthDateField() {
+  Widget _buildBirthDateField(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return FormFieldWrapper(
-      label: 'Fecha de Nacimiento',
+      label: l10n.fieldBirthDateLabel,
       child: InkWell(
         onTap: _selectBirthDate,
         borderRadius: BorderRadius.circular(7),
@@ -419,14 +433,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: TextFormField(
             validator: (_) {
               if (_birthDate == null) {
-                return 'Selecciona fecha';
+                return l10n.fieldBirthDateError;
               }
 
               return null;
             },
             decoration: authInputDecoration(
               hint: _birthDate == null
-                  ? 'dd-mm-aaaa'
+                  ? l10n.fieldBirthDateHint
                   : formatBirthDate(_birthDate!),
               icon: Icons.calendar_today_outlined,
               suffixIcon: const Icon(
@@ -441,9 +455,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildBirthTimeField() {
+  Widget _buildBirthTimeField(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return FormFieldWrapper(
-      label: 'Hora de Nacimiento',
+      label: l10n.fieldBirthTimeLabel,
       child: InkWell(
         onTap: _selectBirthTime,
         borderRadius: BorderRadius.circular(7),
@@ -451,13 +467,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: TextFormField(
             validator: (_) {
               if (_birthTime == null) {
-                return 'Selecciona hora';
+                return l10n.fieldBirthTimeError;
               }
 
               return null;
             },
             decoration: authInputDecoration(
-              hint: _birthTime == null ? '--:--' : formatBirthTime(_birthTime!),
+              hint: _birthTime == null
+                  ? l10n.fieldBirthTimeHint
+                  : formatBirthTime(_birthTime!),
               icon: Icons.schedule_outlined,
               suffixIcon: const Icon(
                 Icons.access_time_outlined,
@@ -471,20 +489,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildBirthPlaceField() {
+  Widget _buildBirthPlaceField(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return FormFieldWrapper(
-      label: 'Lugar de Nacimiento',
+      label: l10n.fieldBirthPlaceLabel,
       child: TextFormField(
         controller: _birthPlaceController,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
-            return 'Ingresa ciudad y país';
+            return l10n.fieldBirthPlaceError;
           }
 
           return null;
         },
         decoration: authInputDecoration(
-          hint: 'Ciudad, País',
+          hint: l10n.fieldBirthPlaceHint,
           icon: Icons.location_on_outlined,
         ),
       ),
@@ -544,14 +564,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
+
     if (_birthDate == null) {
-      _showMessage('Selecciona tu fecha de nacimiento.', isError: true);
+      _showMessage(l10n.selectBirthDateMessage, isError: true);
 
       return;
     }
 
     if (_birthTime == null) {
-      _showMessage('Selecciona tu hora de nacimiento.', isError: true);
+      _showMessage(l10n.selectBirthTimeMessage, isError: true);
 
       return;
     }
@@ -584,29 +606,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
           userData is Map ? userData['id']?.toString() : null;
 
       if (userId == null || userId.isEmpty) {
-        throw AuthException(
-          'El backend no devolvió el id del usuario creado.',
-        );
+        throw const AuthException(AuthErrorCode.invalidResponse);
       }
 
       if (!mounted) {
         return;
       }
 
-      _showMessage('Cuenta creada correctamente.');
+      _showMessage(l10n.accountCreatedMessage);
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => ProfileScreen(userId: userId)),
       );
     } on AuthException catch (error) {
-      debugPrint('AUTH ERROR: ${error.message}');
+      debugPrint('AUTH ERROR: $error');
 
       if (!mounted) {
         return;
       }
 
-      _showMessage(error.message, isError: true);
+      _showMessage(describeError(context, error), isError: true);
     } catch (error, stackTrace) {
       debugPrint('REGISTER ERROR: $error');
       debugPrintStack(stackTrace: stackTrace);
@@ -615,7 +635,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return;
       }
 
-      _showMessage('No fue posible crear la cuenta.\n$error', isError: true);
+      _showMessage(describeError(context, error), isError: true);
     } finally {
       if (mounted) {
         setState(() {

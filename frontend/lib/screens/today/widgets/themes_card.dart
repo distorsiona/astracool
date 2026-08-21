@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../l10n/today_labels.dart';
 import '../../../models/today_model.dart';
 import '../../../theme/card_decorations.dart';
 import 'today_title_line.dart';
@@ -16,6 +18,8 @@ class ThemesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       decoration: cardDecoration(),
@@ -23,7 +27,8 @@ class ThemesCard extends StatelessWidget {
         padding: const EdgeInsets.all(26),
         child: Column(
           children: [
-            TodayTitleLine(title: "TODAY'S THEMES", accentColor: accentColor),
+            TodayTitleLine(
+                title: l10n.todaysThemesTitle, accentColor: accentColor),
             const SizedBox(height: 20),
             ...themes.map(
               (theme) => ThemeRow(theme: theme, accentColor: accentColor),
@@ -43,11 +48,10 @@ class ThemesCard extends StatelessWidget {
                     style: TextStyle(color: accentColor, fontSize: 28),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Tu día refleja la interacción entre tu carta natal y '
-                      'el cielo actual.',
-                      style: TextStyle(
+                      l10n.todayReflectionNote,
+                      style: const TextStyle(
                         color: Color(0xFF554B53),
                         fontSize: 12,
                         height: 1.45,
@@ -81,7 +85,7 @@ class ThemeRow extends StatelessWidget {
           SizedBox(
             width: 100,
             child: Text(
-              theme.name.toUpperCase(),
+              localizedTodayThemeName(context, theme.name).toUpperCase(),
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,

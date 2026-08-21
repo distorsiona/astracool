@@ -36,19 +36,13 @@ class TodayModel {
   ) {
     return TodayModel(
       date: json['date']?.toString() ?? '',
-      moonSign:
-          json['moon_sign']?.toString() ?? '',
-      moonSubtitle:
-          json['moon_subtitle']?.toString() ?? '',
-      interpretation:
-          json['interpretation']?.toString() ?? '',
-      quote:
-          json['quote']?.toString() ?? '',
-
+      moonSign: json['moon_sign']?.toString() ?? '',
+      moonSubtitle: json['moon_subtitle']?.toString() ?? '',
+      interpretation: json['interpretation']?.toString() ?? '',
+      quote: json['quote']?.toString() ?? '',
       bigThree: TodayBigThree.fromJson(
         _map(json['big_three']),
       ),
-
       transits: _list(json['transits'])
           .map(
             (item) => TodayTransit.fromJson(
@@ -56,16 +50,13 @@ class TodayModel {
             ),
           )
           .toList(),
-
-      affectedHouses:
-          _list(json['affected_houses'])
-              .map(
-                (item) => TodayHouse.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
-
+      affectedHouses: _list(json['affected_houses'])
+          .map(
+            (item) => TodayHouse.fromJson(
+              _map(item),
+            ),
+          )
+          .toList(),
       themes: _list(json['themes'])
           .map(
             (item) => TodayTheme.fromJson(
@@ -73,17 +64,12 @@ class TodayModel {
             ),
           )
           .toList(),
-
-      focus:
-          json['focus']?.toString() ?? '',
-      luckyTime:
-          json['lucky_time']?.toString() ?? '',
-      luckyColor:
-          json['lucky_color']?.toString() ?? '',
+      focus: json['focus']?.toString() ?? '',
+      luckyTime: json['lucky_time']?.toString() ?? '',
+      luckyColor: json['lucky_color']?.toString() ?? '',
     );
   }
 }
-
 
 // ============================================================
 // BIG THREE
@@ -106,12 +92,10 @@ class TodayBigThree {
     return TodayBigThree(
       sun: json['sun']?.toString() ?? '',
       moon: json['moon']?.toString() ?? '',
-      rising:
-          json['rising']?.toString() ?? '',
+      rising: json['rising']?.toString() ?? '',
     );
   }
 }
-
 
 // ============================================================
 // TRANSITS
@@ -126,6 +110,12 @@ class TodayTransit {
   final String description;
   final String status;
 
+  // datos crudos usados para reconstruir title/description/status
+  // ya traducidos en el idioma activo, en vez de traducir el texto
+  // en inglés que arma el backend.
+  final bool isExactToday;
+  final String? exactTime;
+
   const TodayTransit({
     required this.first,
     required this.aspect,
@@ -133,28 +123,25 @@ class TodayTransit {
     required this.title,
     required this.description,
     required this.status,
+    required this.isExactToday,
+    required this.exactTime,
   });
 
   factory TodayTransit.fromJson(
     Map<String, dynamic> json,
   ) {
     return TodayTransit(
-      first:
-          json['first']?.toString() ?? '',
-      aspect:
-          json['aspect']?.toString() ?? '',
-      second:
-          json['second']?.toString() ?? '',
-      title:
-          json['title']?.toString() ?? '',
-      description:
-          json['description']?.toString() ?? '',
-      status:
-          json['status']?.toString() ?? '',
+      first: json['first']?.toString() ?? '',
+      aspect: json['aspect']?.toString() ?? '',
+      second: json['second']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
+      isExactToday: json['is_exact_today'] == true,
+      exactTime: json['exact_time']?.toString(),
     );
   }
 }
-
 
 // ============================================================
 // HOUSE
@@ -177,18 +164,13 @@ class TodayHouse {
     Map<String, dynamic> json,
   ) {
     return TodayHouse(
-      number:
-          (json['number'] as num?)?.toInt() ?? 0,
-      title:
-          json['title']?.toString() ?? '',
-      subtitle:
-          json['subtitle']?.toString() ?? '',
-      description:
-          json['description']?.toString() ?? '',
+      number: (json['number'] as num?)?.toInt() ?? 0,
+      title: json['title']?.toString() ?? '',
+      subtitle: json['subtitle']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
     );
   }
 }
-
 
 // ============================================================
 // THEME
@@ -207,14 +189,11 @@ class TodayTheme {
     Map<String, dynamic> json,
   ) {
     return TodayTheme(
-      name:
-          json['name']?.toString() ?? '',
-      value:
-          (json['value'] as num?)?.toInt() ?? 0,
+      name: json['name']?.toString() ?? '',
+      value: (json['value'] as num?)?.toInt() ?? 0,
     );
   }
 }
-
 
 // ============================================================
 // HELPERS
@@ -235,7 +214,6 @@ Map<String, dynamic> _map(
 
   return {};
 }
-
 
 List<dynamic> _list(
   dynamic value,

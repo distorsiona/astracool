@@ -4,6 +4,10 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.services.chart_service import chart_service
+from app.services.translation_service import (
+    normalize_language,
+    translate_list,
+)
 
 
 router = APIRouter(
@@ -865,12 +869,12 @@ def build_house_data(
 # CARGAR CARTA REAL
 # ============================================================
 
-def get_chart_data(
+async def get_chart_data(
     user_id: str,
 ) -> tuple[dict, list, list]:
 
     chart_response = (
-        chart_service.get_chart(
+        await chart_service.get_chart(
             user_id
         )
     )
@@ -1220,6 +1224,7 @@ def build_how_this_may_show_up(
 )
 async def get_houses(
     user_id: str,
+    lang: Optional[str] = None,
 ) -> HousesResponse:
 
     try:
@@ -1228,7 +1233,7 @@ async def get_houses(
             _,
             raw_houses,
             raw_planets,
-        ) = get_chart_data(
+        ) = await get_chart_data(
             user_id
         )
 
@@ -1262,6 +1267,14 @@ async def get_houses(
                 ),
             )
 
+        target_language = normalize_language(lang)
+
+        if target_language != "en":
+            houses = await _translate_houses(
+                houses,
+                target_language,
+            )
+
         return HousesResponse(
             user_id=user_id,
             houses=houses,
@@ -1282,6 +1295,135 @@ async def get_houses(
 
 
 # ============================================================
+# TRADUCCIÓN DE LAS CASAS
+#
+# Traduce title/subtitle/keywords de una o varias casas en un
+# solo batch por campo (independiente de cuántas casas se pasen),
+# reusando translate_list como única fuente de traducción.
+# ============================================================
+
+async def _translate_houses(
+    houses: List[HouseData],
+    target_language: str,
+) -> List[HouseData]:
+
+    titles = await translate_list(
+        [house.title for house in houses],
+        target_language,
+    )
+
+    subtitles = await translate_list(
+        [house.subtitle for house in houses],
+        target_language,
+    )
+
+    flat_keywords: List[str] = []
+    index_map: List[tuple] = []
+
+    for house in houses:
+        start = len(flat_keywords)
+        flat_keywords.extend(house.keywords)
+        index_map.append((start, len(flat_keywords)))
+
+    translated_keywords = await translate_list(
+        flat_keywords,
+        target_language,
+    )
+
+    return [
+        house.model_copy(
+            update={
+                "title": title,
+                "subtitle": subtitle,
+                "keywords": translated_keywords[start:end],
+            }
+        )
+        for house, title, subtitle, (start, end) in zip(
+            houses,
+            titles,
+            subtitles,
+            index_map,
+        )
+    ]
+
+
+# ============================================================
+# TRADUCCIÓN DE LA INTERPRETACIÓN
+#
+# Traduce el texto narrativo de la interpretación personalizada.
+# ============================================================
+
+async def _translate_interpretation(
+    interpretation: HouseInterpretation,
+    target_language: str,
+) -> HouseInterpretation:
+
+    (
+        summary,
+        sign_title,
+        sign_interpretation,
+        ruler_title,
+        ruler_interpretation,
+    ) = await translate_list(
+        [
+            interpretation.summary,
+            interpretation.sign_title,
+            interpretation.sign_interpretation,
+            interpretation.ruler_title,
+            interpretation.ruler_interpretation,
+        ],
+        target_language,
+    )
+
+    influence_titles = await translate_list(
+        [
+            influence.title
+            for influence in interpretation.planet_influences
+        ],
+        target_language,
+    )
+
+    influence_texts = await translate_list(
+        [
+            influence.interpretation
+            for influence in interpretation.planet_influences
+        ],
+        target_language,
+    )
+
+    planet_influences = [
+        influence.model_copy(
+            update={
+                "title": title,
+                "interpretation": text,
+            }
+        )
+        for influence, title, text in zip(
+            interpretation.planet_influences,
+            influence_titles,
+            influence_texts,
+        )
+    ]
+
+    how_this_may_show_up = await translate_list(
+        interpretation.how_this_may_show_up,
+        target_language,
+    )
+
+    return interpretation.model_copy(
+        update={
+            "summary": summary,
+            "sign_title": sign_title,
+            "sign_interpretation": sign_interpretation,
+            "ruler_title": ruler_title,
+            "ruler_interpretation": ruler_interpretation,
+            "planet_influences": planet_influences,
+            "how_this_may_show_up": how_this_may_show_up,
+        }
+    )
+
+
+# ============================================================
 # GET DETALLE PERSONALIZADO
 #
 # GET /api/houses/{user_id}/{house_number}
@@ -1295,6 +1437,7 @@ async def get_houses(
 async def get_house_detail(
     user_id: str,
     house_number: int,
+    lang: Optional[str] = None,
 ) -> HouseDetailResponse:
 
     try:
@@ -1316,7 +1459,7 @@ async def get_house_detail(
             _,
             raw_houses,
             raw_planets,
-        ) = get_chart_data(
+        ) = await get_chart_data(
             user_id
         )
 
@@ -1428,6 +1571,28 @@ async def get_house_detail(
                 )
             ),
         )
+
+        # --------------------------------------------------------
+        # Traducir si corresponde
+        #
+        # la interpretación se construye SIEMPRE en inglés primero
+        # (usa house.title en sus f-strings), y recién después se
+        # traduce house.title/subtitle/keywords por separado, para
+        # no mezclar idiomas dentro de una misma oración generada.
+        # --------------------------------------------------------
+
+        target_language = normalize_language(lang)
+
+        if target_language != "en":
+            interpretation = await _translate_interpretation(
+                interpretation,
+                target_language,
+            )
+
+            (house,) = await _translate_houses(
+                [house],
+                target_language,
+            )
 
         return HouseDetailResponse(
             user_id=user_id,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/natal_chart_model.dart';
 import '../../../utils/astrology_symbols.dart';
 import '../../../theme/card_decorations.dart';
@@ -22,6 +24,8 @@ class AspectsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(layout == ChartLayout.mobile ? 18 : 24),
@@ -29,10 +33,10 @@ class AspectsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ChartSectionTitle(title: 'ASPECTS', accentColor: accentColor),
+          ChartSectionTitle(title: l10n.aspectsTitle, accentColor: accentColor),
           const SizedBox(height: 18),
           if (aspects.isEmpty)
-            const Text('No hay aspectos disponibles.')
+            Text(l10n.noAspectsMessage)
           else
             ...aspects.map(
               (aspect) => AspectRow(
@@ -61,6 +65,8 @@ class AspectRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -80,7 +86,9 @@ class AspectRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${aspect.first} ${aspectName(aspect.type)} ${aspect.second}',
+                  '${localizedPlanetName(context, aspect.first)} '
+                  '${localizedAspectName(context, aspect.type)} '
+                  '${localizedPlanetName(context, aspect.second)}',
                   maxLines: compact ? 2 : 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontWeight: FontWeight.w600),
@@ -88,7 +96,7 @@ class AspectRow extends StatelessWidget {
                 if (compact) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Orb ${formatAstrologyDegree(aspect.orb)}',
+                    l10n.orbLabel(formatAstrologyDegree(aspect.orb)),
                     style: const TextStyle(
                       color: Color(0xFF817380),
                       fontSize: 11,
@@ -101,7 +109,7 @@ class AspectRow extends StatelessWidget {
           if (!compact) ...[
             const SizedBox(width: 16),
             Text(
-              'Orb ${formatAstrologyDegree(aspect.orb)}',
+              l10n.orbLabel(formatAstrologyDegree(aspect.orb)),
               style: const TextStyle(color: Color(0xFF817380), fontSize: 11),
             ),
           ],

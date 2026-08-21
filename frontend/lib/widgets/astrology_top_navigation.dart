@@ -1,10 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
+
+// ================================================================
+// SECCIONES PRINCIPALES
+//
+// today   -> TODAY / HOY
+// chart   -> CHART / CARTA
+// week    -> WEEK / SEMANA
+// profile -> ME / YO
+// account -> ícono de usuario / Account Settings
+//
+// account NO aparece como texto en la barra.
+// ================================================================
+
 enum AstrologySection {
   today,
   chart,
   week,
   profile,
+  account,
 }
 
 class AstrologyTopNavigation extends StatelessWidget {
@@ -14,7 +29,12 @@ class AstrologyTopNavigation extends StatelessWidget {
   final VoidCallback? onToday;
   final VoidCallback? onChart;
   final VoidCallback? onWeek;
+
+  // ME / YO
   final VoidCallback? onProfile;
+
+  // ícono de usuario / account settings
+  final VoidCallback? onAccountProfile;
 
   const AstrologyTopNavigation({
     super.key,
@@ -24,6 +44,7 @@ class AstrologyTopNavigation extends StatelessWidget {
     this.onChart,
     this.onWeek,
     this.onProfile,
+    this.onAccountProfile,
   });
 
   @override
@@ -35,36 +56,31 @@ class AstrologyTopNavigation extends StatelessWidget {
       ) {
         final width = constraints.maxWidth;
 
-        // ======================================================
-        // MOBILE
-        // ======================================================
-
         if (width < 650) {
-          return _buildMobile();
+          return _buildMobile(context);
         }
-
-        // ======================================================
-        // TABLET / VENTANA MEDIANA
-        // ======================================================
 
         if (width < 1050) {
-          return _buildTablet();
+          return _buildTablet(context);
         }
 
-        // ======================================================
-        // DESKTOP
-        // ======================================================
-
-        return _buildDesktop();
+        return _buildDesktop(context);
       },
     );
   }
 
-  // ============================================================
+  // ==============================================================
   // DESKTOP
-  // ============================================================
+  // ==============================================================
 
-  Widget _buildDesktop() {
+  Widget _buildDesktop(
+    BuildContext context,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final accountSelected =
+        activeSection == AstrologySection.account;
+
     return Container(
       width: double.infinity,
       height: 92,
@@ -74,9 +90,9 @@ class AstrologyTopNavigation extends StatelessWidget {
       decoration: _bottomBorderDecoration(),
       child: Row(
         children: [
-          // ====================================================
+          // ======================================================
           // LOGO
-          // ====================================================
+          // ======================================================
 
           SizedBox(
             width: 180,
@@ -95,44 +111,48 @@ class AstrologyTopNavigation extends StatelessWidget {
             ),
           ),
 
-          // ====================================================
-          // NAV
-          // ====================================================
+          // ======================================================
+          // NAVEGACIÓN CENTRAL
+          // ======================================================
 
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _DesktopNavItem(
-                  title: 'TODAY',
-                  selected: activeSection == AstrologySection.today,
+                  title: l10n.navToday,
+                  selected:
+                      activeSection == AstrologySection.today,
                   accentColor: accentColor,
                   onTap: onToday,
                 ),
-                const SizedBox(
-                  width: 36,
-                ),
+
+                const SizedBox(width: 36),
+
                 _DesktopNavItem(
-                  title: 'CHART',
-                  selected: activeSection == AstrologySection.chart,
+                  title: l10n.navChart,
+                  selected:
+                      activeSection == AstrologySection.chart,
                   accentColor: accentColor,
                   onTap: onChart,
                 ),
-                const SizedBox(
-                  width: 36,
-                ),
+
+                const SizedBox(width: 36),
+
                 _DesktopNavItem(
-                  title: 'WEEK',
-                  selected: activeSection == AstrologySection.week,
+                  title: l10n.navWeek,
+                  selected:
+                      activeSection == AstrologySection.week,
                   accentColor: accentColor,
                   onTap: onWeek,
                 ),
-                const SizedBox(
-                  width: 36,
-                ),
+
+                const SizedBox(width: 36),
+
                 _DesktopNavItem(
-                  title: 'ME',
-                  selected: activeSection == AstrologySection.profile,
+                  title: l10n.navMe,
+                  selected:
+                      activeSection == AstrologySection.profile,
                   accentColor: accentColor,
                   onTap: onProfile,
                 ),
@@ -140,18 +160,18 @@ class AstrologyTopNavigation extends StatelessWidget {
             ),
           ),
 
-          // ====================================================
-          // PROFILE ICON
-          // ====================================================
+          // ======================================================
+          // ACCOUNT SETTINGS
+          // ======================================================
 
           SizedBox(
             width: 180,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _ProfileButton(
-                selected: activeSection == AstrologySection.profile,
+              child: _AccountButton(
+                selected: accountSelected,
                 accentColor: accentColor,
-                onTap: onProfile,
+                onTap: onAccountProfile,
                 size: 44,
                 iconSize: 25,
               ),
@@ -162,11 +182,18 @@ class AstrologyTopNavigation extends StatelessWidget {
     );
   }
 
-  // ============================================================
+  // ==============================================================
   // TABLET
-  // ============================================================
+  // ==============================================================
 
-  Widget _buildTablet() {
+  Widget _buildTablet(
+    BuildContext context,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final accountSelected =
+        activeSection == AstrologySection.account;
+
     return Container(
       width: double.infinity,
       height: 78,
@@ -176,10 +203,6 @@ class AstrologyTopNavigation extends StatelessWidget {
       decoration: _bottomBorderDecoration(),
       child: Row(
         children: [
-          // ====================================================
-          // LOGO MÁS COMPACTO
-          // ====================================================
-
           Text(
             'SACRED',
             maxLines: 1,
@@ -191,46 +214,46 @@ class AstrologyTopNavigation extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(
-            width: 16,
-          ),
-
-          // ====================================================
-          // NAV FLEXIBLE
-          // ====================================================
+          const SizedBox(width: 16),
 
           Expanded(
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
                   child: _TabletNavItem(
-                    title: 'TODAY',
-                    selected: activeSection == AstrologySection.today,
+                    title: l10n.navToday,
+                    selected:
+                        activeSection == AstrologySection.today,
                     accentColor: accentColor,
                     onTap: onToday,
                   ),
                 ),
+
                 Expanded(
                   child: _TabletNavItem(
-                    title: 'CHART',
-                    selected: activeSection == AstrologySection.chart,
+                    title: l10n.navChart,
+                    selected:
+                        activeSection == AstrologySection.chart,
                     accentColor: accentColor,
                     onTap: onChart,
                   ),
                 ),
+
                 Expanded(
                   child: _TabletNavItem(
-                    title: 'WEEK',
-                    selected: activeSection == AstrologySection.week,
+                    title: l10n.navWeek,
+                    selected:
+                        activeSection == AstrologySection.week,
                     accentColor: accentColor,
                     onTap: onWeek,
                   ),
                 ),
+
                 Expanded(
                   child: _TabletNavItem(
-                    title: 'ME',
-                    selected: activeSection == AstrologySection.profile,
+                    title: l10n.navMe,
+                    selected:
+                        activeSection == AstrologySection.profile,
                     accentColor: accentColor,
                     onTap: onProfile,
                   ),
@@ -239,36 +262,41 @@ class AstrologyTopNavigation extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(
-            width: 12,
-          ),
+          const SizedBox(width: 12),
 
-          _ProfileButton(
-            selected: activeSection == AstrologySection.profile,
+          _AccountButton(
+            selected: accountSelected,
             accentColor: accentColor,
-            onTap: onProfile,
-            size: 38,
-            iconSize: 22,
+            onTap: onAccountProfile,
+            size: 40,
+            iconSize: 23,
           ),
         ],
       ),
     );
   }
 
-  // ============================================================
+  // ==============================================================
   // MOBILE
-  // ============================================================
+  // ==============================================================
 
-  Widget _buildMobile() {
+  Widget _buildMobile(
+    BuildContext context,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final accountSelected =
+        activeSection == AstrologySection.account;
+
     return Container(
       width: double.infinity,
       decoration: _bottomBorderDecoration(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ====================================================
+          // ======================================================
           // TOP ROW
-          // ====================================================
+          // ======================================================
 
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -292,23 +320,23 @@ class AstrologyTopNavigation extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(
-                  width: 12,
-                ),
-                _ProfileButton(
-                  selected: activeSection == AstrologySection.profile,
+
+                const SizedBox(width: 12),
+
+                _AccountButton(
+                  selected: accountSelected,
                   accentColor: accentColor,
-                  onTap: onProfile,
-                  size: 34,
-                  iconSize: 20,
+                  onTap: onAccountProfile,
+                  size: 36,
+                  iconSize: 21,
                 ),
               ],
             ),
           ),
 
-          // ====================================================
-          // NAV - NO SCROLL, SIEMPRE CABE
-          // ====================================================
+          // ======================================================
+          // NAV
+          // ======================================================
 
           SizedBox(
             height: 46,
@@ -316,32 +344,39 @@ class AstrologyTopNavigation extends StatelessWidget {
               children: [
                 Expanded(
                   child: _MobileNavItem(
-                    title: 'TODAY',
-                    selected: activeSection == AstrologySection.today,
+                    title: l10n.navToday,
+                    selected:
+                        activeSection == AstrologySection.today,
                     accentColor: accentColor,
                     onTap: onToday,
                   ),
                 ),
+
                 Expanded(
                   child: _MobileNavItem(
-                    title: 'CHART',
-                    selected: activeSection == AstrologySection.chart,
+                    title: l10n.navChart,
+                    selected:
+                        activeSection == AstrologySection.chart,
                     accentColor: accentColor,
                     onTap: onChart,
                   ),
                 ),
+
                 Expanded(
                   child: _MobileNavItem(
-                    title: 'WEEK',
-                    selected: activeSection == AstrologySection.week,
+                    title: l10n.navWeek,
+                    selected:
+                        activeSection == AstrologySection.week,
                     accentColor: accentColor,
                     onTap: onWeek,
                   ),
                 ),
+
                 Expanded(
                   child: _MobileNavItem(
-                    title: 'ME',
-                    selected: activeSection == AstrologySection.profile,
+                    title: l10n.navMe,
+                    selected:
+                        activeSection == AstrologySection.profile,
                     accentColor: accentColor,
                     onTap: onProfile,
                   ),
@@ -356,10 +391,10 @@ class AstrologyTopNavigation extends StatelessWidget {
 }
 
 // ================================================================
-// PROFILE BUTTON
+// ACCOUNT BUTTON
 // ================================================================
 
-class _ProfileButton extends StatelessWidget {
+class _AccountButton extends StatelessWidget {
   final bool selected;
   final Color accentColor;
   final VoidCallback? onTap;
@@ -367,7 +402,7 @@ class _ProfileButton extends StatelessWidget {
   final double size;
   final double iconSize;
 
-  const _ProfileButton({
+  const _AccountButton({
     required this.selected,
     required this.accentColor,
     required this.onTap,
@@ -381,33 +416,34 @@ class _ProfileButton extends StatelessWidget {
   ) {
     return Material(
       color: Colors.transparent,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(
-          999,
-        ),
-        child: Container(
+        customBorder: const CircleBorder(),
+        child: AnimatedContainer(
+          duration: const Duration(
+            milliseconds: 180,
+          ),
           width: size,
           height: size,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
+
+            // account activo
+            color: selected
+                ? accentColor.withAlpha(20)
+                : Colors.transparent,
+
             border: Border.all(
-              color: selected
-                  ? accentColor
-                  : const Color(
-                      0xFF252525,
-                    ),
-              width: selected ? 1.8 : 1.1,
+              color: accentColor,
+              width: selected ? 2 : 1.3,
             ),
           ),
           child: Icon(
             Icons.person_outline,
             size: iconSize,
-            color: selected
-                ? accentColor
-                : const Color(
-                    0xFF252525,
-                  ),
+            color: accentColor,
           ),
         ),
       ),
@@ -416,7 +452,7 @@ class _ProfileButton extends StatelessWidget {
 }
 
 // ================================================================
-// DESKTOP ITEM
+// DESKTOP NAV ITEM
 // ================================================================
 
 class _DesktopNavItem extends StatelessWidget {
@@ -445,25 +481,24 @@ class _DesktopNavItem extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(
-                height: 4,
-              ),
+              const SizedBox(height: 4),
+
               Text(
                 title,
                 maxLines: 1,
                 style: TextStyle(
                   color: selected
                       ? accentColor
-                      : const Color(
-                          0xFF1E1E1E,
-                        ),
+                      : const Color(0xFF1E1E1E),
                   fontSize: 14,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: selected
+                      ? FontWeight.w600
+                      : FontWeight.w400,
                 ),
               ),
-              const SizedBox(
-                height: 9,
-              ),
+
+              const SizedBox(height: 9),
+
               AnimatedContainer(
                 duration: const Duration(
                   milliseconds: 180,
@@ -486,7 +521,7 @@ class _DesktopNavItem extends StatelessWidget {
 }
 
 // ================================================================
-// TABLET ITEM
+// TABLET NAV ITEM
 // ================================================================
 
 class _TabletNavItem extends StatelessWidget {
@@ -522,16 +557,16 @@ class _TabletNavItem extends StatelessWidget {
                 style: TextStyle(
                   color: selected
                       ? accentColor
-                      : const Color(
-                          0xFF252525,
-                        ),
+                      : const Color(0xFF252525),
                   fontSize: 12,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  fontWeight: selected
+                      ? FontWeight.w600
+                      : FontWeight.w400,
                 ),
               ),
-              const SizedBox(
-                height: 8,
-              ),
+
+              const SizedBox(height: 8),
+
               AnimatedContainer(
                 duration: const Duration(
                   milliseconds: 180,
@@ -554,7 +589,7 @@ class _TabletNavItem extends StatelessWidget {
 }
 
 // ================================================================
-// MOBILE ITEM
+// MOBILE NAV ITEM
 // ================================================================
 
 class _MobileNavItem extends StatelessWidget {
@@ -590,15 +625,16 @@ class _MobileNavItem extends StatelessWidget {
                   style: TextStyle(
                     color: selected
                         ? accentColor
-                        : const Color(
-                            0xFF252525,
-                          ),
+                        : const Color(0xFF252525),
                     fontSize: 10.5,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    fontWeight: selected
+                        ? FontWeight.w600
+                        : FontWeight.w400,
                   ),
                 ),
               ),
             ),
+
             AnimatedContainer(
               duration: const Duration(
                 milliseconds: 180,
@@ -625,14 +661,10 @@ class _MobileNavItem extends StatelessWidget {
 
 BoxDecoration _bottomBorderDecoration() {
   return const BoxDecoration(
-    color: Color(
-      0xFFF4F1EE,
-    ),
+    color: Color(0xFFF4F1EE),
     border: Border(
       bottom: BorderSide(
-        color: Color(
-          0xFFD4D0CA,
-        ),
+        color: Color(0xFFD4D0CA),
         width: 1,
       ),
     ),

@@ -26,9 +26,7 @@ class ZodiacAttributeItem extends StatelessWidget {
             child: icon,
           ),
         ),
-
         const SizedBox(width: 12),
-
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -41,9 +39,7 @@ class ZodiacAttributeItem extends StatelessWidget {
                 letterSpacing: 0.5,
               ),
             ),
-
             const SizedBox(height: 4),
-
             Text(
               value.toUpperCase(),
               style: const TextStyle(

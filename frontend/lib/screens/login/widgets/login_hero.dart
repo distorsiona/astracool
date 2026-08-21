@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/auth_colors.dart';
 
 class LoginHero extends StatelessWidget {
@@ -9,6 +10,8 @@ class LoginHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return SizedBox(
       width: double.infinity,
       height: mobile ? 190 : double.infinity,
@@ -70,7 +73,7 @@ class LoginHero extends StatelessWidget {
                 ),
                 SizedBox(height: mobile ? 5 : 12),
                 Text(
-                  'Tu destino te espera.',
+                  l10n.loginHeroTitle,
                   style: TextStyle(
                     color: authDarkPurple,
                     fontFamily: 'serif',
@@ -80,10 +83,9 @@ class LoginHero extends StatelessWidget {
                 ),
                 if (!mobile) ...[
                   const SizedBox(height: 10),
-                  const Text(
-                    'Conecta con tu esencia cósmica y '
-                    'descubre lo que los astros tienen preparado para ti.',
-                    style: TextStyle(
+                  Text(
+                    l10n.loginHeroSubtitle,
+                    style: const TextStyle(
                       color: Color(0xFF554B55),
                       fontSize: 14,
                       height: 1.6,

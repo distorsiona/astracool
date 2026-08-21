@@ -5,6 +5,8 @@ import 'package:frontend/services/auth_service.dart';
 
 import 'login/widgets/login_hero.dart';
 
+import '../l10n/error_messages.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../theme/auth_colors.dart';
 import '../theme/auth_input_decoration.dart';
 import '../widgets/auth_top_logo.dart';
@@ -43,10 +45,10 @@ class _LoginScreenState extends State<LoginScreen> {
             final width = constraints.maxWidth;
 
             if (width < 650) {
-              return _buildMobile();
+              return _buildMobile(context);
             }
 
-            return _buildDesktop();
+            return _buildDesktop(context);
           },
         ),
       ),
@@ -57,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // DESKTOP / TABLET
   // ============================================================
 
-  Widget _buildDesktop() {
+  Widget _buildDesktop(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
       child: Column(
@@ -85,7 +87,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Row(
                   children: [
                     const Expanded(flex: 48, child: LoginHero(mobile: false)),
-                    Expanded(flex: 52, child: _buildForm(mobile: false)),
+                    Expanded(
+                        flex: 52, child: _buildForm(context, mobile: false)),
                   ],
                 ),
               ),
@@ -101,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // MOBILE
   // ============================================================
 
-  Widget _buildMobile() {
+  Widget _buildMobile(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 32),
       child: Column(
@@ -119,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: [
                 const LoginHero(mobile: true),
-                _buildForm(mobile: true),
+                _buildForm(context, mobile: true),
               ],
             ),
           ),
@@ -132,7 +135,9 @@ class _LoginScreenState extends State<LoginScreen> {
   // FORMULARIO
   // ============================================================
 
-  Widget _buildForm({required bool mobile}) {
+  Widget _buildForm(BuildContext context, {required bool mobile}) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: mobile ? 24 : 55,
@@ -146,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Bienvenido de nuevo',
+              l10n.loginWelcomeTitle,
               style: TextStyle(
                 color: const Color(0xFF271E28),
                 fontFamily: 'serif',
@@ -155,43 +160,43 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 7),
-            const Text(
-              'Conéctate a tu cosmos personal.',
-              style: TextStyle(color: Color(0xFF675F67), fontSize: 13),
+            Text(
+              l10n.loginWelcomeSubtitle,
+              style: const TextStyle(color: Color(0xFF675F67), fontSize: 13),
             ),
             SizedBox(height: mobile ? 34 : 42),
             FormFieldWrapper(
-              label: 'Correo o @username',
+              label: l10n.fieldEmailOrUsernameLabel,
               child: TextFormField(
                 controller: _userController,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Ingresa tu correo o usuario';
+                    return l10n.fieldEmailOrUsernameError;
                   }
 
                   return null;
                 },
                 decoration: authInputDecoration(
-                  hint: 'Introduce tu correo o usuario',
+                  hint: l10n.fieldEmailOrUsernameHint,
                   icon: Icons.person_outline,
                 ),
               ),
             ),
             const SizedBox(height: 20),
             FormFieldWrapper(
-              label: 'Contraseña',
+              label: l10n.fieldPasswordLabel,
               child: TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Ingresa tu contraseña';
+                    return l10n.fieldPasswordRequiredError;
                   }
 
                   return null;
                 },
                 decoration: authInputDecoration(
-                  hint: 'Contraseña',
+                  hint: l10n.fieldPasswordHint,
                   icon: Icons.lock_outline,
                   suffixIcon: IconButton(
                     onPressed: () {
@@ -219,9 +224,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: EdgeInsets.zero,
                   foregroundColor: authDarkPurple,
                 ),
-                child: const Text(
-                  '¿Olvidaste tu contraseña?',
-                  style: TextStyle(fontSize: 12),
+                child: Text(
+                  l10n.forgotPassword,
+                  style: const TextStyle(fontSize: 12),
                 ),
               ),
             ),
@@ -247,18 +252,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : const Row(
+                    : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Iniciar Sesión',
-                            style: TextStyle(
+                            l10n.loginButton,
+                            style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                             ),
                           ),
-                          SizedBox(width: 12),
-                          Icon(Icons.arrow_forward, size: 18),
+                          const SizedBox(width: 12),
+                          const Icon(Icons.arrow_forward, size: 18),
                         ],
                       ),
               ),
@@ -267,10 +272,11 @@ class _LoginScreenState extends State<LoginScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Flexible(
+                Flexible(
                   child: Text(
-                    '¿No tienes una cuenta?',
-                    style: TextStyle(color: Color(0xFF675F67), fontSize: 12),
+                    l10n.noAccountPrompt,
+                    style:
+                        const TextStyle(color: Color(0xFF675F67), fontSize: 12),
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -281,9 +287,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     minimumSize: Size.zero,
                     foregroundColor: authPurple,
                   ),
-                  child: const Text(
-                    'Regístrate',
-                    style: TextStyle(fontSize: 12),
+                  child: Text(
+                    l10n.signUpLink,
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ),
               ],
@@ -352,7 +358,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } on AuthException catch (error) {
-      debugPrint('AUTH ERROR: ${error.message}');
+      debugPrint('AUTH ERROR: $error');
 
       if (!mounted) {
         return;
@@ -360,7 +366,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(error.message)));
+        ..showSnackBar(SnackBar(content: Text(describeError(context, error))));
     } catch (error, stackTrace) {
       debugPrint('LOGIN ERROR: $error');
       debugPrintStack(stackTrace: stackTrace);
@@ -372,7 +378,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          SnackBar(content: Text('No fue posible iniciar sesión.\n$error')),
+          SnackBar(content: Text(describeError(context, error))),
         );
     } finally {
       if (mounted) {

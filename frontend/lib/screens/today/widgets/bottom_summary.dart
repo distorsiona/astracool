@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../l10n/today_labels.dart';
+import '../../../models/today_model.dart';
 import '../../../theme/card_decorations.dart';
 
 class BottomSummary extends StatelessWidget {
   final String focus;
   final String luckyTime;
   final String luckyColor;
+  final String moonSign;
+  final List<TodayTransit> transits;
   final Color accentColor;
   final bool mobile;
 
@@ -14,12 +19,24 @@ class BottomSummary extends StatelessWidget {
     required this.focus,
     required this.luckyTime,
     required this.luckyColor,
+    required this.moonSign,
+    required this.transits,
     required this.accentColor,
     this.mobile = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final localizedFocus = localizedTodayFocus(context, transits, focus);
+
+    final localizedLuckyColor = localizedTodayLuckyColor(
+      context,
+      moonSign,
+      luckyColor,
+    );
+
     if (mobile) {
       return Container(
         width: double.infinity,
@@ -27,20 +44,20 @@ class BottomSummary extends StatelessWidget {
         child: Column(
           children: [
             SummaryItem(
-              title: "TODAY'S FOCUS",
-              value: focus,
+              title: l10n.todaysFocusTitle,
+              value: localizedFocus,
               accentColor: accentColor,
             ),
             const Divider(height: 1),
             SummaryItem(
-              title: 'LUCKY TIME',
+              title: l10n.luckyTimeTitle,
               value: luckyTime,
               accentColor: accentColor,
             ),
             const Divider(height: 1),
             SummaryItem(
-              title: 'LUCKY COLOR',
-              value: luckyColor,
+              title: l10n.luckyColorTitle,
+              value: localizedLuckyColor,
               accentColor: accentColor,
             ),
           ],
@@ -56,15 +73,15 @@ class BottomSummary extends StatelessWidget {
           Expanded(
             flex: 2,
             child: SummaryItem(
-              title: "TODAY'S FOCUS",
-              value: focus,
+              title: l10n.todaysFocusTitle,
+              value: localizedFocus,
               accentColor: accentColor,
             ),
           ),
           _summaryDivider(),
           Expanded(
             child: SummaryItem(
-              title: 'LUCKY TIME',
+              title: l10n.luckyTimeTitle,
               value: luckyTime,
               accentColor: accentColor,
             ),
@@ -72,8 +89,8 @@ class BottomSummary extends StatelessWidget {
           _summaryDivider(),
           Expanded(
             child: SummaryItem(
-              title: 'LUCKY COLOR',
-              value: luckyColor,
+              title: l10n.luckyColorTitle,
+              value: localizedLuckyColor,
               accentColor: accentColor,
             ),
           ),

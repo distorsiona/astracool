@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/error_messages.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../l10n/locale_controller.dart';
 import '../models/house_model.dart';
 import '../services/api_service.dart';
 import '../theme/zodiac_theme.dart';
@@ -31,29 +34,54 @@ class _AllHousesScreenState extends State<AllHousesScreen> {
   final ApiService _apiService = ApiService();
 
   bool _isLoading = true;
-  String? _errorMessage;
+  Object? _loadError;
 
   List<HouseModel> _houses = [];
+
+  // se usan para volver a pedir las casas cuando el usuario
+  // cambia de idioma en tiempo de ejecución (EN <-> ES).
+  bool _initialized = false;
+  String? _lastLanguage;
 
   @override
   void initState() {
     super.initState();
-    _loadHouses();
+    // la carga inicial se dispara desde didChangeDependencies,
+    // porque ahí sí es seguro leer LocaleScope.of(context).
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final currentLanguage = LocaleScope.of(context).value.languageCode;
+
+    if (!_initialized) {
+      _initialized = true;
+      _lastLanguage = currentLanguage;
+      _loadHouses();
+      return;
+    }
+
+    if (_lastLanguage != currentLanguage) {
+      _lastLanguage = currentLanguage;
+      _loadHouses();
+    }
   }
 
   Future<void> _loadHouses() async {
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
+      _loadError = null;
     });
 
     try {
       final response = await _apiService.getHouses(
         widget.userId,
+        language: LocaleScope.of(context).value.languageCode,
       );
 
-      final sortedHouses = [...response.houses]
-        ..sort(
+      final sortedHouses = [...response.houses]..sort(
           (a, b) => a.house.compareTo(b.house),
         );
 
@@ -71,7 +99,7 @@ class _AllHousesScreenState extends State<AllHousesScreen> {
       }
 
       setState(() {
-        _errorMessage = error.toString();
+        _loadError = error;
         _isLoading = false;
       });
     }
@@ -90,18 +118,16 @@ class _AllHousesScreenState extends State<AllHousesScreen> {
           children: [
             SacredDetailTopBar(
               accentColor: accentColor,
-              trailingLabel: 'HOUSES',
+              trailingLabel: AppLocalizations.of(context)!.housesTopBarLabel,
               onBack: () => Navigator.pop(context),
             ),
-
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final width = constraints.maxWidth;
 
                   final isMobile = width < 650;
-                  final isTablet =
-                      width >= 650 && width < 1100;
+                  final isTablet = width >= 650 && width < 1100;
 
                   final horizontalPadding = isMobile
                       ? 14.0
@@ -109,17 +135,13 @@ class _AllHousesScreenState extends State<AllHousesScreen> {
                           ? 28.0
                           : 46.0;
 
-                  final topPadding = isMobile
-                      ? 20.0
-                      : 30.0;
+                  final topPadding = isMobile ? 20.0 : 30.0;
 
                   return RefreshIndicator(
                     onRefresh: _loadHouses,
                     child: SingleChildScrollView(
-                      physics:
-                          const AlwaysScrollableScrollPhysics(
-                        parent:
-                            BouncingScrollPhysics(),
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
                       ),
                       padding: EdgeInsets.fromLTRB(
                         horizontalPadding,
@@ -129,62 +151,47 @@ class _AllHousesScreenState extends State<AllHousesScreen> {
                       ),
                       child: Center(
                         child: ConstrainedBox(
-                          constraints:
-                              const BoxConstraints(
+                          constraints: const BoxConstraints(
                             maxWidth: 1540,
                           ),
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.stretch,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               PageHeader(
                                 accentColor: accentColor,
                                 isMobile: isMobile,
                                 isTablet: isTablet,
                               ),
-
                               const SizedBox(height: 30),
-
                               if (_isLoading)
                                 _LoadingHousesCard(
-                                  accentColor:
-                                      accentColor,
+                                  accentColor: accentColor,
                                 )
-                              else if (_errorMessage != null)
+                              else if (_loadError != null)
                                 _ErrorHousesCard(
-                                  accentColor:
-                                      accentColor,
-                                  message:
-                                      _errorMessage!,
-                                  onRetry:
-                                      _loadHouses,
+                                  accentColor: accentColor,
+                                  message: describeError(context, _loadError!),
+                                  onRetry: _loadHouses,
                                 )
                               else if (_houses.isEmpty)
                                 EmptyHousesCard(
-                                  accentColor:
-                                      accentColor,
+                                  accentColor: accentColor,
                                 )
                               else
                                 ResponsiveHousesGrid(
                                   houses: _houses,
-                                  accentColor:
-                                      accentColor,
+                                  accentColor: accentColor,
                                   isMobile: isMobile,
                                   isTablet: isTablet,
                                   onHouseTap: (house) {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) =>
-                                            HouseDetailScreen(
-                                          userId:
-                                              widget.userId,
-                                          chartId:
-                                              widget.chartId,
-                                          houseNumber:
-                                              house.house,
-                                          zodiacSign:
-                                              widget.zodiacSign,
+                                        builder: (_) => HouseDetailScreen(
+                                          userId: widget.userId,
+                                          chartId: widget.chartId,
+                                          houseNumber: house.house,
+                                          zodiacSign: widget.zodiacSign,
                                         ),
                                       ),
                                     );
@@ -252,6 +259,8 @@ class _ErrorHousesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -268,7 +277,7 @@ class _ErrorHousesCard extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'Could not load houses',
+            l10n.couldNotLoadHousesTitle,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 18,
@@ -276,9 +285,7 @@ class _ErrorHousesCard extends StatelessWidget {
               color: accentColor,
             ),
           ),
-
           const SizedBox(height: 10),
-
           Text(
             message,
             textAlign: TextAlign.center,
@@ -288,9 +295,7 @@ class _ErrorHousesCard extends StatelessWidget {
               color: Color(0xFF6B625D),
             ),
           ),
-
           const SizedBox(height: 20),
-
           OutlinedButton(
             onPressed: onRetry,
             style: OutlinedButton.styleFrom(
@@ -299,8 +304,8 @@ class _ErrorHousesCard extends StatelessWidget {
                 color: accentColor,
               ),
             ),
-            child: const Text(
-              'RETRY',
+            child: Text(
+              l10n.retry.toUpperCase(),
             ),
           ),
         ],

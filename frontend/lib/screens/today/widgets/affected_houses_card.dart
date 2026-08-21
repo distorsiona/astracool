@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../l10n/today_labels.dart';
 import '../../../models/today_model.dart';
 import '../../../theme/card_decorations.dart';
 import '../../../utils/astrology_symbols.dart';
@@ -17,6 +19,8 @@ class AffectedHousesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       decoration: cardDecoration(),
@@ -25,12 +29,12 @@ class AffectedHousesCard extends StatelessWidget {
         child: Column(
           children: [
             TodayTitleLine(
-              title: 'AFFECTED HOUSES',
+              title: l10n.affectedHousesTitle,
               accentColor: accentColor,
             ),
             const SizedBox(height: 20),
             if (houses.isEmpty)
-              const Text('No hay casas especialmente activadas.')
+              Text(l10n.noActiveHousesMessage)
             else
               ...houses.take(3).map(
                     (house) => HouseRow(house: house, accentColor: accentColor),
@@ -79,7 +83,7 @@ class HouseRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  house.title,
+                  localizedTodayHouseTitle(context, house.number),
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
@@ -87,7 +91,11 @@ class HouseRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  house.subtitle,
+                  localizedTodayHouseSubtitle(
+                    context,
+                    house.number,
+                    house.subtitle,
+                  ),
                   style: TextStyle(
                     color: accentColor,
                     fontSize: 12,
@@ -96,7 +104,11 @@ class HouseRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 7),
                 Text(
-                  house.description,
+                  localizedTodayHouseDescription(
+                    context,
+                    house.number,
+                    house.description,
+                  ),
                   style: const TextStyle(
                     color: Color(0xFF625961),
                     fontSize: 12,

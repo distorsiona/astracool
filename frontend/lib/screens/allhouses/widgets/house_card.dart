@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/house_model.dart';
 import '../../../theme/card_decorations.dart';
 import '../../../utils/astrology_symbols.dart';
@@ -20,6 +22,8 @@ class HouseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -53,15 +57,15 @@ class HouseCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-
                     const SizedBox(width: 12),
-
                     const Spacer(),
-
                     if (house.activity.level.trim().isNotEmpty)
                       Flexible(
                         child: HouseStrengthBadge(
-                          label: house.activity.level,
+                          label: localizedActivityLevel(
+                            context,
+                            house.activity.level,
+                          ),
                           accentColor: accentColor,
                         ),
                       ),
@@ -76,8 +80,12 @@ class HouseCard extends StatelessWidget {
 
                 Text(
                   house.title.trim().isEmpty
-                      ? 'HOUSE ${house.house}'
-                      : house.title.toUpperCase(),
+                      ? l10n.houseFallbackTitle(house.house)
+                      : localizeHouseTitle(
+                          context,
+                          house.house,
+                          house.title,
+                        ).toUpperCase(),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -92,7 +100,11 @@ class HouseCard extends StatelessWidget {
                 if (house.subtitle.trim().isNotEmpty) ...[
                   const SizedBox(height: 5),
                   Text(
-                    house.subtitle,
+                    localizeHouseSubtitle(
+                      context,
+                      house.house,
+                      house.subtitle,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -116,12 +128,11 @@ class HouseCard extends StatelessWidget {
                       color: accentColor,
                       size: 14,
                     ),
-
                     const SizedBox(width: 7),
-
                     Expanded(
                       child: Text(
-                        '${house.sign} · ${house.formattedDegree}',
+                        '${localizedSignName(context, house.sign)} · '
+                        '${house.formattedDegree}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -149,14 +160,14 @@ class HouseCard extends StatelessWidget {
                         fontSize: 16,
                       ),
                     ),
-
                     const SizedBox(width: 7),
-
                     Expanded(
                       child: Text(
                         house.ruler.trim().isEmpty
-                            ? 'Ruler · —'
-                            : 'Ruler · ${house.ruler}',
+                            ? l10n.rulerUnknown
+                            : l10n.rulerWithName(
+                                localizedPlanetName(context, house.ruler),
+                              ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -180,7 +191,8 @@ class HouseCard extends StatelessWidget {
                     runSpacing: 7,
                     children: house.planets.map((planet) {
                       return Text(
-                        '${planet.symbol} ${planet.name}',
+                        '${planet.symbol} '
+                        '${localizedPlanetName(context, planet.name)}',
                         style: TextStyle(
                           color: accentColor,
                           fontSize: 10.5,
@@ -190,9 +202,9 @@ class HouseCard extends StatelessWidget {
                     }).toList(),
                   )
                 else
-                  const Text(
-                    'No natal planets',
-                    style: TextStyle(
+                  Text(
+                    l10n.noNatalPlanetsMessage,
+                    style: const TextStyle(
                       color: Color(0xFF9B8F9A),
                       fontSize: 10,
                       fontStyle: FontStyle.italic,
@@ -212,6 +224,7 @@ class HouseCard extends StatelessWidget {
                       child: Text(
                         house.keywords
                             .take(3)
+                            .map((k) => localizeHouseKeyword(context, k))
                             .join(' · '),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -222,9 +235,7 @@ class HouseCard extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 10),
-
                     Icon(
                       Icons.arrow_forward,
                       color: accentColor,

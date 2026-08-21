@@ -21,7 +21,6 @@ class NatalChartModel {
   }
 }
 
-
 // ============================================================
 // profile
 //
@@ -52,42 +51,16 @@ class ChartProfile {
     Map<String, dynamic> json,
   ) {
     return ChartProfile(
-      id:
-          json['id']?.toString() ?? '',
-
-      displayName:
-          json['display_name']
-              ?.toString() ??
-          '',
-
-      username:
-          json['username']
-              ?.toString() ??
-          '',
-
-      sign:
-          json['sign']
-              ?.toString() ??
-          '',
-
-      element:
-          json['element']
-              ?.toString() ??
-          '',
-
-      modality:
-          json['modality']
-              ?.toString() ??
-          '',
-
-      rulingPlanet:
-          json['ruling_planet']
-              ?.toString() ??
-          '',
+      id: json['id']?.toString() ?? '',
+      displayName: json['display_name']?.toString() ?? '',
+      username: json['username']?.toString() ?? '',
+      sign: json['sign']?.toString() ?? '',
+      element: json['element']?.toString() ?? '',
+      modality: json['modality']?.toString() ?? '',
+      rulingPlanet: json['ruling_planet']?.toString() ?? '',
     );
   }
 }
-
 
 // ============================================================
 // chart
@@ -143,100 +116,65 @@ class NatalChartData {
     Map<String, dynamic> json,
   ) {
     return NatalChartData(
-      id:
-          json['id']?.toString() ?? '',
-
-      bigThree:
-          BigThreeData.fromJson(
+      id: json['id']?.toString() ?? '',
+      bigThree: BigThreeData.fromJson(
         _map(json['big_three']),
       ),
-
-      planets:
-          _list(json['planets'])
-              .map(
-                (item) =>
-                    ChartPlanet.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
-
-      houses:
-          _list(json['houses'])
-              .map(
-                (item) =>
-                    ChartHouse.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
-
-      aspects:
-          _list(json['aspects'])
-              .map(
-                (item) =>
-                    ChartAspect.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
-
-      dominantAspects:
-          _list(
-            json['dominant_aspects'],
+      planets: _list(json['planets'])
+          .map(
+            (item) => ChartPlanet.fromJson(
+              _map(item),
+            ),
           )
-              .map(
-                (item) =>
-                    ChartAspect.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
-
-      featuredHouses:
-          _list(
-            json['featured_houses'],
+          .toList(),
+      houses: _list(json['houses'])
+          .map(
+            (item) => ChartHouse.fromJson(
+              _map(item),
+            ),
           )
-              .map(
-                (item) =>
-                    FeaturedHouse.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
-
-      dominantPatterns:
-          _list(
-            json['dominant_patterns'],
+          .toList(),
+      aspects: _list(json['aspects'])
+          .map(
+            (item) => ChartAspect.fromJson(
+              _map(item),
+            ),
           )
-              .map(
-                (item) =>
-                    ChartPattern.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
-
-      overview:
-          json['overview']
-              ?.toString() ??
-          '',
-
-      wheelUrl:
-          json['wheel_url']
-              ?.toString(),
-
-      generatedAt:
-          json['generated_at']
-              ?.toString(),
-
-      updatedAt:
-          json['updated_at']
-              ?.toString(),
+          .toList(),
+      dominantAspects: _list(
+        json['dominant_aspects'],
+      )
+          .map(
+            (item) => ChartAspect.fromJson(
+              _map(item),
+            ),
+          )
+          .toList(),
+      featuredHouses: _list(
+        json['featured_houses'],
+      )
+          .map(
+            (item) => FeaturedHouse.fromJson(
+              _map(item),
+            ),
+          )
+          .toList(),
+      dominantPatterns: _list(
+        json['dominant_patterns'],
+      )
+          .map(
+            (item) => ChartPattern.fromJson(
+              _map(item),
+            ),
+          )
+          .toList(),
+      overview: json['overview']?.toString() ?? '',
+      wheelUrl: json['wheel_url']?.toString(),
+      generatedAt: json['generated_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
     );
   }
 }
-
 
 // ============================================================
 // big three
@@ -259,24 +197,18 @@ class BigThreeData {
     Map<String, dynamic> json,
   ) {
     return BigThreeData(
-      sun:
-          ChartPlacement.fromJson(
+      sun: ChartPlacement.fromJson(
         _map(json['sun']),
       ),
-
-      moon:
-          ChartPlacement.fromJson(
+      moon: ChartPlacement.fromJson(
         _map(json['moon']),
       ),
-
-      rising:
-          ChartPlacement.fromJson(
+      rising: ChartPlacement.fromJson(
         _map(json['rising']),
       ),
     );
   }
 }
-
 
 // ============================================================
 // placement
@@ -305,34 +237,20 @@ class ChartPlacement {
     Map<String, dynamic> json,
   ) {
     return ChartPlacement(
-      planet:
-          json['planet']
-              ?.toString() ??
-          '',
-
-      sign:
-          json['sign']
-              ?.toString() ??
-          '',
-
-      degree:
-          _double(
+      planet: json['planet']?.toString() ?? '',
+      sign: json['sign']?.toString() ?? '',
+      degree: _double(
         json['degree'],
       ),
-
-      house:
-          _nullableInt(
+      house: _nullableInt(
         json['house'],
       ),
-
-      retrograde:
-          _bool(
+      retrograde: _bool(
         json['retrograde'],
       ),
     );
   }
 }
-
 
 // ============================================================
 // planet
@@ -372,58 +290,24 @@ class ChartPlanet {
     Map<String, dynamic> json,
   ) {
     return ChartPlanet(
-      planet:
-          json['planet']
-              ?.toString() ??
-          json['name']
-              ?.toString() ??
-          '',
-
-      sign:
-          json['sign']
-              ?.toString() ??
-          '',
-
-      degree:
-          _double(
-        json['degree'] ??
-            json['norm_degree'],
+      planet: json['planet']?.toString() ?? json['name']?.toString() ?? '',
+      sign: json['sign']?.toString() ?? '',
+      degree: _double(
+        json['degree'] ?? json['norm_degree'],
       ),
-
-      house:
-          _nullableInt(
+      house: _nullableInt(
         json['house'],
       ),
-
-      retrograde:
-          _bool(
-        json['retrograde'] ??
-            json['is_retro'],
+      retrograde: _bool(
+        json['retrograde'] ?? json['is_retro'],
       ),
-
-      meaning:
-          json['meaning']
-              ?.toString() ??
-          '',
-
-      signInterpretation:
-          json['sign_interpretation']
-              ?.toString() ??
-          '',
-
-      houseInterpretation:
-          json['house_interpretation']
-              ?.toString() ??
-          '',
-
-      interpretation:
-          json['interpretation']
-              ?.toString() ??
-          '',
+      meaning: json['meaning']?.toString() ?? '',
+      signInterpretation: json['sign_interpretation']?.toString() ?? '',
+      houseInterpretation: json['house_interpretation']?.toString() ?? '',
+      interpretation: json['interpretation']?.toString() ?? '',
     );
   }
 }
-
 
 // ============================================================
 // house
@@ -482,110 +366,62 @@ class ChartHouse {
     Map<String, dynamic> json,
   ) {
     return ChartHouse(
-      number:
-          _int(
-        json['house'] ??
-            json['number'],
+      number: _int(
+        json['house'] ?? json['number'],
       ),
-
-      sign:
-          json['sign']
-              ?.toString() ??
-          '',
-
-      degree:
-          _double(
+      sign: json['sign']?.toString() ?? '',
+      degree: _double(
         json['degree'],
       ),
-
-      title:
-          json['title']
-              ?.toString() ??
-          '',
-
-      subtitle:
-          json['subtitle']
-              ?.toString() ??
-          '',
-
-      ruler:
-          json['ruler']
-              ?.toString() ??
-          '',
-
-      meaning:
-          json['meaning']
-              ?.toString() ??
-          '',
-
-      interpretation:
-          json['interpretation']
-              ?.toString() ??
-          '',
-
-      strengthScore:
-          _double(
+      title: json['title']?.toString() ?? '',
+      subtitle: json['subtitle']?.toString() ?? '',
+      ruler: json['ruler']?.toString() ?? '',
+      meaning: json['meaning']?.toString() ?? '',
+      interpretation: json['interpretation']?.toString() ?? '',
+      strengthScore: _double(
         json['strength_score'],
       ),
-
-      strengthLabel:
-          json['strength_label']
-              ?.toString() ??
-          '',
-
-      themes:
-          _stringList(
+      strengthLabel: json['strength_label']?.toString() ?? '',
+      themes: _stringList(
         json['themes'],
       ),
-
-      planets:
-          _list(
-            json['planets'],
+      planets: _list(
+        json['planets'],
+      )
+          .map(
+            (item) => ChartPlanet.fromJson(
+              _map(item),
+            ),
           )
-              .map(
-                (item) =>
-                    ChartPlanet.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
-
-      supportiveInfluences:
-          _list(
-            json['supportive_influences'],
+          .toList(),
+      supportiveInfluences: _list(
+        json['supportive_influences'],
+      )
+          .map(
+            (item) => HouseInfluence.fromJson(
+              _map(item),
+            ),
           )
-              .map(
-                (item) =>
-                    HouseInfluence.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
-
-      challengingInfluences:
-          _list(
-            json['challenging_influences'],
+          .toList(),
+      challengingInfluences: _list(
+        json['challenging_influences'],
+      )
+          .map(
+            (item) => HouseInfluence.fromJson(
+              _map(item),
+            ),
           )
-              .map(
-                (item) =>
-                    HouseInfluence.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
-
-      rulerPlacement:
-          json['ruler_placement'] == null
-              ? null
-              : HouseRulerPlacement.fromJson(
-                  _map(
-                    json['ruler_placement'],
-                  ),
-                ),
+          .toList(),
+      rulerPlacement: json['ruler_placement'] == null
+          ? null
+          : HouseRulerPlacement.fromJson(
+              _map(
+                json['ruler_placement'],
+              ),
+            ),
     );
   }
 }
-
 
 // ============================================================
 // featured house
@@ -646,112 +482,78 @@ class FeaturedHouse {
     Map<String, dynamic> json,
   ) {
     return FeaturedHouse(
-      number:
-          _int(
-        json['house'] ??
-            json['number'],
+      number: _int(
+        json['house'] ?? json['number'],
       ),
 
-      sign:
-          json['sign']
-              ?.toString() ??
-          '',
+      sign: json['sign']?.toString() ?? '',
 
-      degree:
-          _double(
+      degree: _double(
         json['degree'],
       ),
 
-      title:
-          json['title']
-              ?.toString() ??
-          '',
+      title: json['title']?.toString() ?? '',
 
-      subtitle:
-          json['subtitle']
-              ?.toString() ??
-          '',
+      subtitle: json['subtitle']?.toString() ?? '',
 
-      ruler:
-          json['ruler']
-              ?.toString() ??
-          '',
+      ruler: json['ruler']?.toString() ?? '',
 
-      strengthScore:
-          _double(
+      strengthScore: _double(
         json['strength_score'],
       ),
 
-      strengthLabel:
-          json['strength_label']
-              ?.toString() ??
-          '',
+      strengthLabel: json['strength_label']?.toString() ?? '',
 
-      themes:
-          _stringList(
+      themes: _stringList(
         json['themes'],
       ),
 
       // el backend devuelve planetas completos
       // dentro de cada featured house
-      planets:
-          _list(
-            json['planets'],
+      planets: _list(
+        json['planets'],
+      )
+          .map(
+            (item) => ChartPlanet.fromJson(
+              _map(item),
+            ),
           )
-              .map(
-                (item) =>
-                    ChartPlanet.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
+          .toList(),
 
-      supportiveInfluences:
-          _list(
-            json['supportive_influences'],
+      supportiveInfluences: _list(
+        json['supportive_influences'],
+      )
+          .map(
+            (item) => HouseInfluence.fromJson(
+              _map(item),
+            ),
           )
-              .map(
-                (item) =>
-                    HouseInfluence.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
+          .toList(),
 
-      challengingInfluences:
-          _list(
-            json['challenging_influences'],
+      challengingInfluences: _list(
+        json['challenging_influences'],
+      )
+          .map(
+            (item) => HouseInfluence.fromJson(
+              _map(item),
+            ),
           )
-              .map(
-                (item) =>
-                    HouseInfluence.fromJson(
-                  _map(item),
-                ),
-              )
-              .toList(),
+          .toList(),
 
-      rulerPlacement:
-          json['ruler_placement'] == null
-              ? null
-              : HouseRulerPlacement.fromJson(
-                  _map(
-                    json['ruler_placement'],
-                  ),
-                ),
+      rulerPlacement: json['ruler_placement'] == null
+          ? null
+          : HouseRulerPlacement.fromJson(
+              _map(
+                json['ruler_placement'],
+              ),
+            ),
 
-      meaning:
-          json['meaning']
-              ?.toString() ??
-          '',
+      meaning: json['meaning']?.toString() ?? '',
 
-      interpretation:
-          json['interpretation']
-              ?.toString() ??
-          '',
+      interpretation: json['interpretation']?.toString() ?? '',
     );
   }
 }
-
 
 // ============================================================
 // posición del regente de una casa
@@ -788,39 +590,21 @@ class HouseRulerPlacement {
     Map<String, dynamic> json,
   ) {
     return HouseRulerPlacement(
-      planet:
-          json['planet']
-              ?.toString() ??
-          '',
-
-      sign:
-          json['sign']
-              ?.toString() ??
-          '',
-
-      degree:
-          _double(
+      planet: json['planet']?.toString() ?? '',
+      sign: json['sign']?.toString() ?? '',
+      degree: _double(
         json['degree'],
       ),
-
-      house:
-          _nullableInt(
+      house: _nullableInt(
         json['house'],
       ),
-
-      retrograde:
-          _bool(
+      retrograde: _bool(
         json['retrograde'],
       ),
-
-      interpretation:
-          json['interpretation']
-              ?.toString() ??
-          '',
+      interpretation: json['interpretation']?.toString() ?? '',
     );
   }
 }
-
 
 // ============================================================
 // influencia sobre una casa
@@ -858,44 +642,18 @@ class HouseInfluence {
     Map<String, dynamic> json,
   ) {
     return HouseInfluence(
-      first:
-          json['first']
-              ?.toString() ??
-          '',
-
-      second:
-          json['second']
-              ?.toString() ??
-          '',
-
-      type:
-          json['type']
-              ?.toString() ??
-          '',
-
-      orb:
-          _double(
+      first: json['first']?.toString() ?? '',
+      second: json['second']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
+      orb: _double(
         json['orb'],
       ),
-
-      nature:
-          json['nature']
-              ?.toString() ??
-          '',
-
-      strength:
-          json['strength']
-              ?.toString() ??
-          '',
-
-      interpretation:
-          json['interpretation']
-              ?.toString() ??
-          '',
+      nature: json['nature']?.toString() ?? '',
+      strength: json['strength']?.toString() ?? '',
+      interpretation: json['interpretation']?.toString() ?? '',
     );
   }
 }
-
 
 // ============================================================
 // aspect
@@ -930,55 +688,27 @@ class ChartAspect {
     Map<String, dynamic> json,
   ) {
     return ChartAspect(
-      first:
-          json['first']
-              ?.toString() ??
-          json['aspecting_planet']
-              ?.toString() ??
+      first: json['first']?.toString() ??
+          json['aspecting_planet']?.toString() ??
           '',
-
-      second:
-          json['second']
-              ?.toString() ??
-          json['aspected_planet']
-              ?.toString() ??
+      second: json['second']?.toString() ??
+          json['aspected_planet']?.toString() ??
           '',
-
-      type:
-          json['type']
-              ?.toString() ??
-          '',
-
-      orb:
-          _double(
+      type: json['type']?.toString() ?? '',
+      orb: _double(
         json['orb'],
       ),
-
-      diff:
-          json['diff'] == null
-              ? null
-              : _double(
-                  json['diff'],
-                ),
-
-      nature:
-          json['nature']
-              ?.toString() ??
-          '',
-
-      strength:
-          json['strength']
-              ?.toString() ??
-          '',
-
-      interpretation:
-          json['interpretation']
-              ?.toString() ??
-          '',
+      diff: json['diff'] == null
+          ? null
+          : _double(
+              json['diff'],
+            ),
+      nature: json['nature']?.toString() ?? '',
+      strength: json['strength']?.toString() ?? '',
+      interpretation: json['interpretation']?.toString() ?? '',
     );
   }
 }
-
 
 // ============================================================
 // dominant pattern
@@ -1013,44 +743,20 @@ class ChartPattern {
     Map<String, dynamic> json,
   ) {
     return ChartPattern(
-      id:
-          json['id']
-              ?.toString() ??
-          '',
-
-      title:
-          json['title']
-              ?.toString() ??
-          '',
-
-      type:
-          json['type']
-              ?.toString() ??
-          '',
-
-      strength:
-          json['strength']
-              ?.toString() ??
-          '',
-
-      objects:
-          _stringList(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
+      strength: json['strength']?.toString() ?? '',
+      objects: _stringList(
         json['objects'],
       ),
-
-      themes:
-          _stringList(
+      themes: _stringList(
         json['themes'],
       ),
-
-      interpretation:
-          json['interpretation']
-              ?.toString() ??
-          '',
+      interpretation: json['interpretation']?.toString() ?? '',
     );
   }
 }
-
 
 // ============================================================
 // mostrar grados
@@ -1074,12 +780,9 @@ class ChartPattern {
 String formatAstrologyDegree(
   double decimalDegree,
 ) {
-  var degree =
-      decimalDegree.floor();
+  var degree = decimalDegree.floor();
 
-  var minutes =
-      ((decimalDegree - degree) * 60)
-          .round();
+  var minutes = ((decimalDegree - degree) * 60).round();
 
   // puede pasar que al redondear
   // terminemos temporalmente con 60 minutos.
@@ -1091,12 +794,9 @@ String formatAstrologyDegree(
     minutes = 0;
   }
 
-  return (
-    "$degree°"
-    "${minutes.toString().padLeft(2, '0')}'"
-  );
+  return ("$degree°"
+      "${minutes.toString().padLeft(2, '0')}'");
 }
-
 
 // ============================================================
 // helpers para leer el json
@@ -1121,7 +821,6 @@ Map<String, dynamic> _map(
   return {};
 }
 
-
 List<dynamic> _list(
   dynamic value,
 ) {
@@ -1132,7 +831,6 @@ List<dynamic> _list(
   return const [];
 }
 
-
 List<String> _stringList(
   dynamic value,
 ) {
@@ -1142,12 +840,10 @@ List<String> _stringList(
 
   return value
       .map(
-        (item) =>
-            item.toString(),
+        (item) => item.toString(),
       )
       .toList();
 }
-
 
 double _double(
   dynamic value,
@@ -1162,7 +858,6 @@ double _double(
       0;
 }
 
-
 int _int(
   dynamic value,
 ) {
@@ -1175,7 +870,6 @@ int _int(
       ) ??
       0;
 }
-
 
 int? _nullableInt(
   dynamic value,
@@ -1193,7 +887,6 @@ int? _nullableInt(
   );
 }
 
-
 bool _bool(
   dynamic value,
 ) {
@@ -1201,8 +894,5 @@ bool _bool(
     return value;
   }
 
-  return value
-          ?.toString()
-          .toLowerCase() ==
-      'true';
+  return value?.toString().toLowerCase() == 'true';
 }

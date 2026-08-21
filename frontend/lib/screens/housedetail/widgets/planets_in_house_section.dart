@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/domain_labels.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/house_model.dart';
 import '../../../theme/card_decorations.dart';
 
@@ -18,15 +20,12 @@ class PlanetsInHouseSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SectionCard(
-      title: 'PLANETS IN THIS HOUSE',
+      title: AppLocalizations.of(context)!.planetsInThisHouseTitle,
       accentColor: accentColor,
       child: house.planets.isEmpty
-          ? const Text(
-              'There are no natal planets in this house. '
-              'This does not mean the house is unimportant. '
-              'Its sign and ruling planet still describe how '
-              'this area of life is expressed.',
-              style: TextStyle(
+          ? Text(
+              AppLocalizations.of(context)!.noPlanetsInHouseMessage,
+              style: const TextStyle(
                 color: Color(0xFF4F434F),
                 fontSize: 12.5,
                 height: 1.6,
@@ -37,8 +36,7 @@ class PlanetsInHouseSection extends StatelessWidget {
                 (planet) {
                   return PlanetInHouseRow(
                     planet: planet,
-                    accentColor:
-                        accentColor,
+                    accentColor: accentColor,
                   );
                 },
               ).toList(),
@@ -47,8 +45,7 @@ class PlanetsInHouseSection extends StatelessWidget {
   }
 }
 
-class PlanetInHouseRow
-    extends StatelessWidget {
+class PlanetInHouseRow extends StatelessWidget {
   final HousePlanetModel planet;
   final Color accentColor;
 
@@ -62,12 +59,10 @@ class PlanetInHouseRow
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding:
-          const EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         vertical: 12,
       ),
-      decoration:
-          bottomLineDecoration(),
+      decoration: bottomLineDecoration(),
       child: Row(
         children: [
           SizedBox(
@@ -80,57 +75,39 @@ class PlanetInHouseRow
               ),
             ),
           ),
-
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  planet.name,
+                  localizedPlanetName(context, planet.name),
                   maxLines: 1,
-                  overflow:
-                      TextOverflow.ellipsis,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color:
-                        Color(0xFF231729),
+                    color: Color(0xFF231729),
                     fontSize: 13,
-                    fontWeight:
-                        FontWeight.w600,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-
                 const SizedBox(height: 4),
-
                 Wrap(
                   spacing: 5,
                   runSpacing: 3,
                   children: [
-                    if (planet.sign != null &&
-                        planet.sign!
-                            .trim()
-                            .isNotEmpty)
+                    if (planet.sign != null && planet.sign!.trim().isNotEmpty)
                       Text(
-                        planet.sign!,
-                        style:
-                            const TextStyle(
-                          color:
-                              Color(0xFF817380),
+                        localizedSignName(context, planet.sign!),
+                        style: const TextStyle(
+                          color: Color(0xFF817380),
                           fontSize: 11,
                         ),
                       ),
-
-                    if (planet.formattedDegree !=
-                            null &&
-                        planet.formattedDegree!
-                            .trim()
-                            .isNotEmpty)
+                    if (planet.formattedDegree != null &&
+                        planet.formattedDegree!.trim().isNotEmpty)
                       Text(
                         '· ${planet.formattedDegree}',
-                        style:
-                            const TextStyle(
-                          color:
-                              Color(0xFF817380),
+                        style: const TextStyle(
+                          color: Color(0xFF817380),
                           fontSize: 11,
                         ),
                       ),
@@ -139,16 +116,13 @@ class PlanetInHouseRow
               ],
             ),
           ),
-
           if (planet.isRetrograde) ...[
             const SizedBox(width: 8),
-
             Text(
               'R',
               style: TextStyle(
                 color: accentColor,
-                fontWeight:
-                    FontWeight.w700,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],

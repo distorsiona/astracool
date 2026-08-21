@@ -1,58 +1,39 @@
+import 'package:flutter/widgets.dart';
+
+import '../../../l10n/generated/app_localizations.dart';
+
 // significado base de las casas
 //
 // esto sirve mientras backend mande meaning vacío.
-String defaultHouseMeaning(int house) {
+String defaultHouseMeaning(BuildContext context, int house) {
+  final l10n = AppLocalizations.of(context)!;
+
   switch (house) {
     case 1:
-      return 'The First House represents identity, appearance, '
-          'first impressions and the instinctive way you approach life.';
-
+      return l10n.houseMeaning1;
     case 2:
-      return 'The Second House represents money, possessions, '
-          'personal values, security and self-worth.';
-
+      return l10n.houseMeaning2;
     case 3:
-      return 'The Third House represents communication, learning, '
-          'thinking, siblings and your immediate environment.';
-
+      return l10n.houseMeaning3;
     case 4:
-      return 'The Fourth House represents home, family, roots, '
-          'privacy and your emotional foundations.';
-
+      return l10n.houseMeaning4;
     case 5:
-      return 'The Fifth House represents creativity, romance, '
-          'pleasure, self-expression and the things that bring joy.';
-
+      return l10n.houseMeaning5;
     case 6:
-      return 'The Sixth House represents routines, daily work, '
-          'habits, service and personal well-being.';
-
+      return l10n.houseMeaning6;
     case 7:
-      return 'The Seventh House represents relationships, partnerships, '
-          'commitment and the way you meet other people as equals.';
-
+      return l10n.houseMeaning7;
     case 8:
-      return 'The Eighth House represents intimacy, trust, shared resources, '
-          'vulnerability, crisis and transformation.';
-
+      return l10n.houseMeaning8;
     case 9:
-      return 'The Ninth House represents beliefs, philosophy, '
-          'higher learning, travel and the search for meaning.';
-
+      return l10n.houseMeaning9;
     case 10:
-      return 'The Tenth House represents career, reputation, public life, '
-          'ambition and the direction you build over time.';
-
+      return l10n.houseMeaning10;
     case 11:
-      return 'The Eleventh House represents friendships, community, '
-          'networks, collective projects and future goals.';
-
+      return l10n.houseMeaning11;
     case 12:
-      return 'The Twelfth House represents the inner world, solitude, '
-          'the subconscious, hidden emotions and what is processed privately.';
-
+      return l10n.houseMeaning12;
     default:
-      return 'This house represents a specific area of life '
-          'within the natal chart.';
+      return l10n.houseMeaningDefault;
   }
 }

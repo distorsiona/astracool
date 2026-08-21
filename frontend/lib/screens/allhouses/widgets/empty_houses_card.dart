@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/card_decorations.dart';
 
 class EmptyHousesCard extends StatelessWidget {
@@ -18,8 +19,8 @@ class EmptyHousesCard extends StatelessWidget {
         children: [
           Icon(Icons.auto_awesome_outlined, color: accentColor, size: 30),
           const SizedBox(height: 12),
-          const Text(
-            'No house information is available.',
+          Text(
+            AppLocalizations.of(context)!.noHouseInfoMessage,
             textAlign: TextAlign.center,
           ),
         ],

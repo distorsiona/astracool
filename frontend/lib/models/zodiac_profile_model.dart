@@ -134,40 +134,30 @@ class ZodiacProfileModel {
     final Map<String, dynamic> bigThree =
         Map<String, dynamic>.from(rawBigThree);
 
-    final Map<String, dynamic> zodiac =
-        Map<String, dynamic>.from(rawZodiac);
+    final Map<String, dynamic> zodiac = Map<String, dynamic>.from(rawZodiac);
 
-    final String sign =
-        zodiac['sign']?.toString().trim() ?? '';
+    final String sign = zodiac['sign']?.toString().trim() ?? '';
 
     return ZodiacProfileModel(
       sign: sign,
-
       element: _elementFromString(
         zodiac['element']?.toString(),
       ),
-
       modality: _modalityFromString(
         zodiac['modality']?.toString(),
       ),
-
-      rulingPlanet:
-          zodiac['ruling_planet']?.toString().trim() ?? '',
-
+      rulingPlanet: zodiac['ruling_planet']?.toString().trim() ?? '',
       symbol: _symbolForSign(sign),
-
       sun: _bigThreeFromJson(
         label: 'Sun',
         symbol: '☉',
         data: bigThree['sun'],
       ),
-
       moon: _bigThreeFromJson(
         label: 'Moon',
         symbol: '☾',
         data: bigThree['moon'],
       ),
-
       rising: _bigThreeFromJson(
         label: 'Rising',
         symbol: '↑',
@@ -183,41 +173,31 @@ class ZodiacProfileModel {
   factory ZodiacProfileModel.fromJson(
     Map<String, dynamic> json,
   ) {
-    final String sign =
-        json['sign']?.toString().trim() ?? '';
+    final String sign = json['sign']?.toString().trim() ?? '';
 
     return ZodiacProfileModel(
       id: json['id']?.toString(),
       displayName: json['display_name']?.toString(),
       username: json['username']?.toString(),
-
       sign: sign,
-
       element: _elementFromString(
         json['element']?.toString(),
       ),
-
       modality: _modalityFromString(
         json['modality']?.toString(),
       ),
-
-      rulingPlanet:
-          json['ruling_planet']?.toString().trim() ?? '',
-
+      rulingPlanet: json['ruling_planet']?.toString().trim() ?? '',
       symbol: _symbolForSign(sign),
-
       sun: _bigThreeFromJson(
         label: 'Sun',
         symbol: '☉',
         data: json['sun'],
       ),
-
       moon: _bigThreeFromJson(
         label: 'Moon',
         symbol: '☾',
         data: json['moon'],
       ),
-
       rising: _bigThreeFromJson(
         label: 'Rising',
         symbol: '↑',
@@ -241,21 +221,14 @@ class ZodiacProfileModel {
       );
     }
 
-    final Map<String, dynamic> item =
-        Map<String, dynamic>.from(data);
+    final Map<String, dynamic> item = Map<String, dynamic>.from(data);
 
     return BigThreeItem(
       label: label,
       symbol: symbol,
-
-      sign:
-          item['sign']?.toString().trim() ?? '',
-
-      degree:
-          (item['degree'] as num?)?.toDouble() ?? 0.0,
-
-      house:
-          (item['house'] as num?)?.toInt(),
+      sign: item['sign']?.toString().trim() ?? '',
+      degree: (item['degree'] as num?)?.toDouble() ?? 0.0,
+      house: (item['house'] as num?)?.toInt(),
     );
   }
 

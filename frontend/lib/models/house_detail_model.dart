@@ -28,10 +28,8 @@ class RulerPlacementModel {
       sign: json['sign'] as String?,
       house: (json['house'] as num?)?.toInt(),
       degree: (json['degree'] as num?)?.toDouble(),
-      formattedDegree:
-          json['formatted_degree'] as String?,
-      isRetrograde:
-          json['is_retrograde'] as bool? ?? false,
+      formattedDegree: json['formatted_degree'] as String?,
+      isRetrograde: json['is_retrograde'] as bool? ?? false,
     );
   }
 }
@@ -56,8 +54,7 @@ class PlanetInfluenceModel {
       planet: json['planet'] as String? ?? '',
       symbol: json['symbol'] as String? ?? '•',
       title: json['title'] as String? ?? '',
-      interpretation:
-          json['interpretation'] as String? ?? '',
+      interpretation: json['interpretation'] as String? ?? '',
     );
   }
 }
@@ -87,30 +84,21 @@ class HouseInterpretationModel {
   factory HouseInterpretationModel.fromJson(
     Map<String, dynamic> json,
   ) {
-    final influences =
-        json['planet_influences'] as List<dynamic>? ??
-            const [];
+    final influences = json['planet_influences'] as List<dynamic>? ?? const [];
 
-    final showUp =
-        json['how_this_may_show_up'] as List<dynamic>? ??
-            const [];
+    final showUp = json['how_this_may_show_up'] as List<dynamic>? ?? const [];
 
     return HouseInterpretationModel(
       summary: json['summary'] as String? ?? '',
-      signTitle:
-          json['sign_title'] as String? ?? '',
-      signInterpretation:
-          json['sign_interpretation'] as String? ?? '',
-      rulerTitle:
-          json['ruler_title'] as String? ?? '',
-      rulerInterpretation:
-          json['ruler_interpretation'] as String? ?? '',
+      signTitle: json['sign_title'] as String? ?? '',
+      signInterpretation: json['sign_interpretation'] as String? ?? '',
+      rulerTitle: json['ruler_title'] as String? ?? '',
+      rulerInterpretation: json['ruler_interpretation'] as String? ?? '',
       planetInfluences: influences
           .whereType<Map<String, dynamic>>()
           .map(PlanetInfluenceModel.fromJson)
           .toList(),
-      howThisMayShowUp:
-          showUp.map((item) => item.toString()).toList(),
+      howThisMayShowUp: showUp.map((item) => item.toString()).toList(),
     );
   }
 }
@@ -139,17 +127,13 @@ class HouseDetailModel {
     return HouseDetailModel(
       userId: json['user_id'] as String? ?? '',
       house: HouseModel.fromJson(
-        json['house'] as Map<String, dynamic>? ??
-            const {},
+        json['house'] as Map<String, dynamic>? ?? const {},
       ),
       rulerPlacement: rulerJson is Map<String, dynamic>
           ? RulerPlacementModel.fromJson(rulerJson)
           : null,
-      interpretation:
-          HouseInterpretationModel.fromJson(
-        json['interpretation']
-                as Map<String, dynamic>? ??
-            const {},
+      interpretation: HouseInterpretationModel.fromJson(
+        json['interpretation'] as Map<String, dynamic>? ?? const {},
       ),
     );
   }

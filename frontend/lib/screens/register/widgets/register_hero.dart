@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../theme/auth_colors.dart';
 
 class RegisterHero extends StatelessWidget {
@@ -9,6 +10,8 @@ class RegisterHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return SizedBox(
       width: double.infinity,
       height: mobile ? 190 : double.infinity,
@@ -67,7 +70,7 @@ class RegisterHero extends StatelessWidget {
                 ),
                 SizedBox(height: mobile ? 6 : 12),
                 Text(
-                  'Reconoce en lo cósmico.',
+                  l10n.registerHeroTitle,
                   style: TextStyle(
                     color: authDarkPurple,
                     fontFamily: 'serif',
@@ -77,10 +80,9 @@ class RegisterHero extends StatelessWidget {
                 ),
                 if (!mobile) ...[
                   const SizedBox(height: 10),
-                  const Text(
-                    'Una inmersión profunda en tu identidad celestial, '
-                    'presentada con claridad y elegancia moderna.',
-                    style: TextStyle(
+                  Text(
+                    l10n.registerHeroSubtitle,
+                    style: const TextStyle(
                       color: Color(0xFF554B55),
                       fontSize: 14,
                       height: 1.6,

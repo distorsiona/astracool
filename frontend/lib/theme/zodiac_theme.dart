@@ -27,7 +27,6 @@ class ZodiacTheme {
   };
 
   static Color colorForSign(String sign) {
-    return signColors[sign.toLowerCase()] ??  
-        const Color(0xFF8A318E);
+    return signColors[sign.toLowerCase()] ?? const Color(0xFF8A318E);
   }
 }

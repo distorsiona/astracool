@@ -1,6 +1,12 @@
+from typing import Optional
+
 from fastapi import HTTPException
 
 from app.core.supabase import supabase_admin
+from app.services.translation_service import (
+    normalize_language,
+    translate_list,
+)
 
 
 class ChartService:
@@ -228,9 +234,10 @@ class ChartService:
     # obtener la carta completa de una persona
     # =========================================================
 
-    def get_chart(
+    async def get_chart(
         self,
         user_id: str,
+        lang: Optional[str] = None,
     ) -> dict:
 
         # =====================================================
@@ -888,6 +895,25 @@ class ChartService:
                 aspects=aspects,
             )
         )
+
+        # =====================================================
+        # traducir título/subtítulo/temas si corresponde
+        #
+        # esto muta los dicts de enriched_houses en el lugar,
+        # así que featured_houses (que abajo toma referencias a
+        # los mismos dicts) también queda traducido sin trabajo
+        # extra.
+        # =====================================================
+
+        target_language = normalize_language(lang)
+
+        if target_language != "en":
+            enriched_houses = (
+                await self._translate_enriched_houses(
+                    enriched_houses=enriched_houses,
+                    target_language=target_language,
+                )
+            )
 
         # =====================================================
         # elegir las casas más importantes
@@ -1634,6 +1660,63 @@ class ChartService:
                         "",
                 }
             )
+
+        return enriched_houses
+
+    # =========================================================
+    # traducir title/subtitle/themes de las casas enriquecidas
+    #
+    # se batchea por campo (todas las casas juntas) para no
+    # hacer una llamada a LibreTranslate por casa. sign/ruler/
+    # planet names y todo lo demás quedan sin tocar.
+    # =========================================================
+
+    async def _translate_enriched_houses(
+        self,
+        enriched_houses: list,
+        target_language: str,
+    ) -> list:
+
+        titles = await translate_list(
+            [
+                house["title"]
+                for house in enriched_houses
+            ],
+            target_language,
+        )
+
+        subtitles = await translate_list(
+            [
+                house["subtitle"]
+                for house in enriched_houses
+            ],
+            target_language,
+        )
+
+        flat_themes: list = []
+        index_map: list = []
+
+        for house in enriched_houses:
+            start = len(flat_themes)
+            flat_themes.extend(house["themes"])
+            index_map.append(
+                (start, len(flat_themes))
+            )
+
+        translated_themes = await translate_list(
+            flat_themes,
+            target_language,
+        )
+
+        for house, title, subtitle, (start, end) in zip(
+            enriched_houses,
+            titles,
+            subtitles,
+            index_map,
+        ):
+            house["title"] = title
+            house["subtitle"] = subtitle
+            house["themes"] = translated_themes[start:end]
 
         return enriched_houses
 

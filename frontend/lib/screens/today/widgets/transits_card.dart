@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../l10n/today_labels.dart';
 import '../../../models/today_model.dart';
 import '../../../theme/card_decorations.dart';
 import '../../../utils/astrology_symbols.dart';
@@ -19,6 +21,8 @@ class TransitsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       width: double.infinity,
       decoration: cardDecoration(),
@@ -27,12 +31,12 @@ class TransitsCard extends StatelessWidget {
         child: Column(
           children: [
             TodayTitleLine(
-              title: 'ACTIVE TRANSITS',
+              title: l10n.activeTransitsTitle,
               accentColor: accentColor,
             ),
             const SizedBox(height: 20),
             if (transits.isEmpty)
-              const Text('No hay tránsitos destacados hoy.')
+              Text(l10n.noActiveTransitsMessage)
             else
               ...transits.take(4).map(
                     (transit) =>
@@ -88,7 +92,7 @@ class TransitRow extends StatelessWidget {
                   runSpacing: 6,
                   children: [
                     Text(
-                      transit.title,
+                      localizedTransitTitle(context, transit),
                       style: const TextStyle(
                         color: Color(0xFF251F25),
                         fontSize: 14,
@@ -106,7 +110,8 @@ class TransitRow extends StatelessWidget {
                           borderRadius: BorderRadius.circular(99),
                         ),
                         child: Text(
-                          transit.status.toUpperCase(),
+                          localizedTransitStatus(context, transit)
+                              .toUpperCase(),
                           style: TextStyle(
                             color: accentColor,
                             fontSize: 9,
@@ -118,7 +123,7 @@ class TransitRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  transit.description,
+                  localizedTransitDescription(context, transit),
                   style: const TextStyle(
                     color: Color(0xFF625961),
                     fontSize: 12.5,

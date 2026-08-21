@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/domain_labels.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../models/zodiac_profile_model.dart';
 import '../theme/zodiac_theme.dart';
 
@@ -41,12 +43,10 @@ class BigThreeCard extends StatelessWidget {
                   color: accentColor.withAlpha(100),
                 ),
               ),
-
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Text(
-                  'YOUR BIG THREE',
+                  AppLocalizations.of(context)!.bigThreeTitle,
                   style: TextStyle(
                     color: accentColor,
                     fontSize: 15,
@@ -55,7 +55,6 @@ class BigThreeCard extends StatelessWidget {
                   ),
                 ),
               ),
-
               Expanded(
                 child: Divider(
                   color: accentColor.withAlpha(100),
@@ -63,9 +62,7 @@ class BigThreeCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 30),
-
           Row(
             children: [
               Expanded(
@@ -74,18 +71,14 @@ class BigThreeCard extends StatelessWidget {
                   accentColor: accentColor,
                 ),
               ),
-
               _separator(),
-
               Expanded(
                 child: _BigThreeItemView(
                   item: moon,
                   accentColor: accentColor,
                 ),
               ),
-
               _separator(),
-
               Expanded(
                 child: _BigThreeItemView(
                   item: rising,
@@ -117,6 +110,21 @@ class _BigThreeItemView extends StatelessWidget {
     required this.accentColor,
   });
 
+  String _localizedLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    switch (item.label.trim().toLowerCase()) {
+      case 'sun':
+        return l10n.sunLabel;
+      case 'moon':
+        return l10n.moonLabel;
+      case 'rising':
+        return l10n.risingLabel;
+      default:
+        return item.label;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -129,22 +137,18 @@ class _BigThreeItemView extends StatelessWidget {
             height: 1,
           ),
         ),
-
         const SizedBox(height: 10),
-
         Text(
-          item.label.toUpperCase(),
+          _localizedLabel(context).toUpperCase(),
           style: TextStyle(
             color: accentColor,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
         ),
-
         const SizedBox(height: 8),
-
         Text(
-          item.sign.toUpperCase(),
+          localizedSignName(context, item.sign).toUpperCase(),
           style: const TextStyle(
             color: Color(0xFF202020),
             fontFamily: ZodiacTheme.fontSignName,
@@ -152,9 +156,7 @@ class _BigThreeItemView extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-
         const SizedBox(height: 6),
-
         Text(
           item.formattedDegree,
           style: const TextStyle(
